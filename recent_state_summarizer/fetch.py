@@ -47,10 +47,25 @@ def _save(path: str | Path, contents: str) -> None:
 
 if __name__ == "__main__":
     import argparse
+    import textwrap
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("url")
-    parser.add_argument("save_path")
+    help_message = """
+    Retrieve the titles of articles from a specified URL page
+    and save them as a list.
+
+    Support:
+        - はてなブログ（Hatena blog）
+
+    Example:
+        python -m recent_state_summarizer.fetch \\
+          https://awesome.hatenablog.com/archive/2023 awesome_titles.txt
+    """
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(help_message),
+    )
+    parser.add_argument("url", help="URL of archive page")
+    parser.add_argument("save_path", help="Local file path")
     args = parser.parse_args()
 
     _main(args.url, args.save_path)
