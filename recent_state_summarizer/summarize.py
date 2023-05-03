@@ -2,6 +2,8 @@ from pathlib import Path
 
 import openai
 
+MODEL = "gpt-3.5-turbo"
+
 
 def _main(titles_path: str | Path) -> str:
     titles = _read_titles(titles_path)
@@ -33,7 +35,7 @@ def _build_summarize_prompt_text(titles_as_list: str) -> str:
 
 def _complete_chat(prompts):
     return openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", messages=prompts, temperature=0.8
+        model=MODEL, messages=prompts, temperature=0.8
     )
 
 
@@ -48,9 +50,25 @@ def _read_titles(titles_path: str | Path) -> str:
 
 if __name__ == "__main__":
     import argparse
+    import textwrap
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("titles_path")
+    help_message = f"""
+    Summarize a list of blog article titles using the OpenAI API ({MODEL}).
+    This command prints the summary.
+
+    ⚠️ Set `OPENAI_API_KEY` environment variable.
+
+    Example:
+        python -m recent_state_summarizer.summarize awesome_titles.txt
+    """
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(help_message),
+    )
+    parser.add_argument(
+        "titles_path",
+        help="Local file path where the list of titles is saved",
+    )
     args = parser.parse_args()
 
     print(_main(args.titles_path))
