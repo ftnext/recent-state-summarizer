@@ -33,9 +33,9 @@ def _build_summarize_prompt_text(titles_as_list: str) -> str:
 """
 
 
-def _complete_chat(prompts):
+def _complete_chat(prompts, temperature=0.0):
     return openai.ChatCompletion.create(
-        model=MODEL, messages=prompts, temperature=0.8
+        model=MODEL, messages=prompts, temperature=temperature
     )
 
 
