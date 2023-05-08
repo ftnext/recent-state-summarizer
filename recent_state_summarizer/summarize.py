@@ -25,11 +25,13 @@ def _build_prompts(titles: str):
 
 def _build_summarize_prompt_text(titles_as_list: str) -> str:
     return f"""\
-以下は同一人物が最近書いたブログ記事のタイトルの一覧です。
+3つのバッククォートで囲まれた以下は、同一人物が最近書いたブログ記事のタイトルの一覧です。
 それを読み、この人物が最近何をやっているかを詳しく教えてください。
 応答は文ごとに改行して区切ってください。
 
+```
 {titles_as_list}
+```
 """
 
 
