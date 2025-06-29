@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Generator, Iterable
 from pathlib import Path
+from typing import TypedDict
 from urllib.request import urlopen
 
 from bs4 import BeautifulSoup
@@ -9,16 +11,23 @@ from bs4 import BeautifulSoup
 PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
 
 
-def _main(url: str, save_path: str | Path) -> None:
-    contents = fetch_titles_as_bullet_list(url)
+class TitleTag(TypedDict):
+    title: str
+    url: str
+
+
+def _main(url: str, save_path: str | Path, save_as_json: bool) -> None:
+    title_tags = _fetch_titles(url)
+    if not save_as_json:
+        contents = _as_bullet_list(
+            title_tag["title"] for title_tag in title_tags
+        )
+    else:
+        contents = _as_json(title_tags)
     _save(save_path, contents)
 
 
-def fetch_titles_as_bullet_list(url: str) -> str:
-    return _as_bullet_list(_fetch_titles(url))
-
-
-def _fetch_titles(url: str) -> Generator[str, None, None]:
+def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
     raw_html = _fetch(url)
     yield from _parse_titles(raw_html)
 
@@ -28,16 +37,22 @@ def _fetch(url: str) -> str:
         return res.read()
 
 
-def _parse_titles(raw_html: str) -> Generator[str, None, None]:
+def _parse_titles(raw_html: str) -> Generator[TitleTag, None, None]:
     soup = BeautifulSoup(raw_html, "html.parser")
     body = soup.body
     title_tags = body.find_all(**PARSE_HATENABLOG_KWARGS)
     for title_tag in title_tags:
-        yield title_tag.text
+        yield {"title": title_tag.text, "url": title_tag["href"]}
 
 
 def _as_bullet_list(titles: Iterable[str]) -> str:
     return "\n".join(f"- {title}" for title in titles)
+
+
+def _as_json(title_tags: Iterable[TitleTag]) -> str:
+    return "\n".join(
+        json.dumps(title_tag, ensure_ascii=False) for title_tag in title_tags
+    )
 
 
 def _save(path: str | Path, contents: str) -> None:
@@ -66,6 +81,12 @@ if __name__ == "__main__":
     )
     parser.add_argument("url", help="URL of archive page")
     parser.add_argument("save_path", help="Local file path")
+    parser.add_argument(
+        "--as-json",
+        action="store_true",
+        default=False,
+        help="Save as JSON format instead of bullet list",
+    )
     args = parser.parse_args()
 
-    _main(args.url, args.save_path)
+    _main(args.url, args.save_path, args.as_json)
