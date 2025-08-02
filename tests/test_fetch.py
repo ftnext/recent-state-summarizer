@@ -1,9 +1,12 @@
 from textwrap import dedent
 
+import pytest
+
 from recent_state_summarizer.fetch import _main
 
 
-def test_fetch_as_bullet_list(httpserver, tmp_path):
+@pytest.fixture
+def blog_server(httpserver):
     httpserver.expect_request("/archive/2025/06").respond_with_data(
         dedent(
             f"""
@@ -30,9 +33,12 @@ def test_fetch_as_bullet_list(httpserver, tmp_path):
         """
         )
     )
+    return httpserver
 
+
+def test_fetch_as_bullet_list(blog_server, tmp_path):
     _main(
-        httpserver.url_for("/archive/2025/06"),
+        blog_server.url_for("/archive/2025/06"),
         tmp_path / "titles.txt",
         save_as_json=False,
     )
@@ -42,3 +48,17 @@ def test_fetch_as_bullet_list(httpserver, tmp_path):
 - Title 2
 - Title 1"""
     assert (tmp_path / "titles.txt").read_text(encoding="utf8") == expected
+
+
+def test_fetch_as_json(blog_server, tmp_path):
+    _main(
+        blog_server.url_for("/archive/2025/06"),
+        tmp_path / "titles.json",
+        save_as_json=True,
+    )
+
+    expected = f"""\
+{{"title": "Title 3", "url": "{blog_server.url_for('/archive/2025/06/03')}"}}
+{{"title": "Title 2", "url": "{blog_server.url_for('/archive/2025/06/02')}"}}
+{{"title": "Title 1", "url": "{blog_server.url_for('/archive/2025/06/01')}"}}"""
+    assert (tmp_path / "titles.json").read_text(encoding="utf8") == expected
