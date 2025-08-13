@@ -1,5 +1,3 @@
-from textwrap import dedent
-
 import pytest
 
 from recent_state_summarizer.fetch import _main
@@ -8,14 +6,17 @@ from recent_state_summarizer.fetch import _main
 @pytest.fixture
 def blog_server(httpserver):
     httpserver.expect_request("/archive/2025/06").respond_with_data(
-        dedent(
-            f"""
-        <!DOCTYPE html>
-        <html>
-          <head><title>Archive</title></head>
-          <body>
-            <h1>Archive</h1>
-            <div id="content">
+        f"""\
+<!DOCTYPE html>
+<html>
+  <head><title>Archive</title></head>
+  <body>
+    <h1>Archive</h1>
+    <div id="content">
+      <div id="content-inner">
+        <div id="wrapper">
+          <div id="main">
+            <div id="main-inner">
               <div class="archive-entries">
                 <section class="archive-entry">
                   <a class="entry-title-link" href="{httpserver.url_for('/')}archive/2025/06/03">Title 3</a>
@@ -28,10 +29,12 @@ def blog_server(httpserver):
                 </section>
               </div>
             </div>
-          </body>
-        </html>
-        """
-        )
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>"""
     )
     return httpserver
 
