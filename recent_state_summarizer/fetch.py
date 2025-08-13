@@ -31,6 +31,12 @@ def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
     raw_html = _fetch(url)
     yield from _parse_titles(raw_html)
 
+    soup = BeautifulSoup(raw_html, "html.parser")
+    next_link = soup.find("a", string="次のページ")
+    if next_link and "href" in next_link.attrs:
+        raw_html = _fetch(next_link["href"])
+        yield from _parse_titles(raw_html)
+
 
 def _fetch(url: str) -> str:
     with urlopen(url) as res:
