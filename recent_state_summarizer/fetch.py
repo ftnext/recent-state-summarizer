@@ -32,10 +32,11 @@ def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
     yield from _parse_titles(raw_html)
 
     soup = BeautifulSoup(raw_html, "html.parser")
-    next_link = soup.find("a", string="次のページ")
+    next_link = soup.find("a", class_="test-pager-next")
     if next_link and "href" in next_link.attrs:
-        raw_html = _fetch(next_link["href"])
-        yield from _parse_titles(raw_html)
+        next_url = next_link["href"]
+        print(f"Next page found, fetching... {next_url}")
+        yield from _fetch_titles(next_url)
 
 
 def _fetch(url: str) -> str:
