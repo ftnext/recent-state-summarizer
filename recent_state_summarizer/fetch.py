@@ -27,6 +27,11 @@ def _main(url: str, save_path: str | Path, save_as_json: bool) -> None:
     _save(save_path, contents)
 
 
+def fetch_titles_as_bullet_list(url: str) -> str:
+    title_tags = _fetch_titles(url)
+    return _as_bullet_list(title_tag["title"] for title_tag in title_tags)
+
+
 def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
     raw_html = _fetch(url)
     yield from _parse_titles(raw_html)
