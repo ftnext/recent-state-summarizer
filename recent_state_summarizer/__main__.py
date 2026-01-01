@@ -1,6 +1,9 @@
 import argparse
+import sys
 from textwrap import dedent
 
+from recent_state_summarizer.fetch import _main as fetch_main
+from recent_state_summarizer.fetch import build_parser as build_fetch_parser
 from recent_state_summarizer.fetch import fetch_titles_as_bullet_list
 from recent_state_summarizer.summarize import summarize_titles
 
@@ -24,13 +27,34 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent(help_message),
     )
-    parser.add_argument("url", help="URL of archive page")
+    subparsers = parser.add_subparsers(dest="subcommand")
+
+    run_parser = subparsers.add_parser("run", help=argparse.SUPPRESS)
+    run_parser.add_argument("url", help="URL of archive page")
+    run_parser.set_defaults(func=run_cli)
+
+    fetch_parser = subparsers.add_parser(
+        "fetch", parents=[build_fetch_parser(add_help=False)]
+    )
+    fetch_parser.set_defaults(func=fetch_cli)
+
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-
+def run_cli(args):
     titles = fetch_titles_as_bullet_list(args.url)
     summary = summarize_titles(titles)
     print(summary)
+
+
+def fetch_cli(args):
+    fetch_main(args.url, args.save_path, save_as_json=not args.as_text)
+
+
+def main():
+    known_subcommands = {"run", "fetch"}
+    if sys.argv[1] not in known_subcommands:
+        sys.argv.insert(1, "run")
+
+    args = parse_args()
+    args.func(args)

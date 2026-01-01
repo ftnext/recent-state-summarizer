@@ -74,7 +74,7 @@ def _save(path: str | Path, contents: str) -> None:
         f.write(contents)
 
 
-def build_parser():
+def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
     help_message = """
     Retrieve the titles and URLs of articles from a web page specified by URL
     and save them as JSON Lines format.
@@ -89,6 +89,7 @@ def build_parser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(help_message),
+        add_help=add_help,
     )
     parser.add_argument("url", help="URL of archive page")
     parser.add_argument("save_path", help="Local file path")

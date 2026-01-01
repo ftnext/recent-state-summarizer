@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 
 import pytest
 import responses
@@ -84,4 +85,18 @@ def test_main_success_path(monkeypatch, blog_server, capsys):
     assert (
         "- Pythonのテストについて学ぶ\n- pytest入門\n- モックとフィクスチャの使い方"
         in request_body["messages"][0]["content"]
+    )
+
+
+@patch("recent_state_summarizer.__main__.fetch_main")
+def test_fetch_subcommand(fetch_main, monkeypatch):
+    monkeypatch.setattr(
+        "sys.argv",
+        ["omae-douyo", "fetch", "https://example.com", "articles.jsonl"],
+    )
+
+    main()
+
+    fetch_main.assert_called_once_with(
+        "https://example.com", "articles.jsonl", save_as_json=True
     )
