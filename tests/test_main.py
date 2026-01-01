@@ -54,11 +54,18 @@ def test_main_success_path(monkeypatch, blog_server, capsys):
             "choices": [
                 {
                     "index": 0,
-                    "message": {"role": "assistant", "content": expected_summary},
+                    "message": {
+                        "role": "assistant",
+                        "content": expected_summary,
+                    },
                     "finish_reason": "stop",
                 }
             ],
-            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
+            "usage": {
+                "prompt_tokens": 100,
+                "completion_tokens": 50,
+                "total_tokens": 150,
+            },
         },
         status=200,
         headers={"Content-Type": "application/json"},
@@ -74,4 +81,7 @@ def test_main_success_path(monkeypatch, blog_server, capsys):
     assert api_call.request.url == "https://api.openai.com/v1/chat/completions"
     assert api_call.request.method == "POST"
     request_body = json.loads(api_call.request.body)
-    assert "- Pythonのテストについて学ぶ\n- pytest入門\n- モックとフィクスチャの使い方" in request_body["messages"][0]["content"]
+    assert (
+        "- Pythonのテストについて学ぶ\n- pytest入門\n- モックとフィクスチャの使い方"
+        in request_body["messages"][0]["content"]
+    )
