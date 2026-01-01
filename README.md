@@ -31,11 +31,23 @@ Currently support:
 
 To see help, type `omae-douyo -h`.
 
+### Fetch only (save to file)
+
+Fetch titles and URLs of articles, and save them to a file without summarization:
+
+```
+# Save as JSON format (default)
+$ omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 articles.json
+
+# Save as bullet list
+$ omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 titles.txt --as-title-list
+```
+
 ## Development
 
 ### Sub commands
 
-Fetch only:
+Fetch only (same as `omae-douyo fetch`):
 
 ```
 python -m recent_state_summarizer.fetch -h
