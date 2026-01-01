@@ -45,7 +45,7 @@ def test_fetch_as_bullet_list(blog_server, tmp_path):
     _main(
         blog_server.url_for("/archive/2025/06"),
         tmp_path / "titles.txt",
-        save_as_json=False,
+        save_as_title_list=True,
     )
 
     expected = """\
@@ -59,7 +59,7 @@ def test_fetch_as_json(blog_server, tmp_path):
     _main(
         blog_server.url_for("/archive/2025/06"),
         tmp_path / "titles.json",
-        save_as_json=True,
+        save_as_title_list=False,
     )
 
     expected = f"""\
@@ -143,7 +143,7 @@ def test_fetch_multiple_archive_page(multi_page_blog_server, tmp_path):
     _main(
         multi_page_blog_server.url_for("/archive/2025/07"),
         tmp_path / "titles.txt",
-        save_as_json=False,
+        save_as_title_list=True,
     )
 
     expected = """- Title 3
@@ -167,7 +167,7 @@ class TestCli:
         cli()
 
         fetch_main.assert_called_once_with(
-            "https://example.com", "output.jsonl", save_as_json=True
+            "https://example.com", "output.jsonl", save_as_title_list=False
         )
 
     def test_as_title_list(self, fetch_main, monkeypatch):
@@ -184,5 +184,5 @@ class TestCli:
         cli()
 
         fetch_main.assert_called_once_with(
-            "https://example.com", "output.txt", save_as_json=False
+            "https://example.com", "output.txt", save_as_title_list=True
         )

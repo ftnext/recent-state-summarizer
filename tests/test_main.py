@@ -98,5 +98,5 @@ def test_fetch_subcommand(fetch_main, monkeypatch):
     main()
 
     fetch_main.assert_called_once_with(
-        "https://example.com", "articles.jsonl", save_as_json=True
+        "https://example.com", "articles.jsonl", save_as_title_list=False
     )

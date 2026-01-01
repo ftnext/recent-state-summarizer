@@ -18,9 +18,11 @@ class TitleTag(TypedDict):
     url: str
 
 
-def _main(url: str, save_path: str | Path, save_as_json: bool) -> None:
+def _main(
+    url: str, save_path: str | Path, *, save_as_title_list: bool
+) -> None:
     title_tags = _fetch_titles(url)
-    if not save_as_json:
+    if save_as_title_list:
         contents = _as_bullet_list(
             title_tag["title"] for title_tag in title_tags
         )
@@ -106,7 +108,7 @@ def cli():
     parser = build_parser()
     args = parser.parse_args()
 
-    _main(args.url, args.save_path, save_as_json=not args.as_title_list)
+    _main(args.url, args.save_path, save_as_title_list=args.as_title_list)
 
 
 if __name__ == "__main__":

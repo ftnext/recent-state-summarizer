@@ -48,7 +48,7 @@ def run_cli(args):
 
 
 def fetch_cli(args):
-    fetch_main(args.url, args.save_path, save_as_json=not args.as_title_list)
+    fetch_main(args.url, args.save_path, save_as_title_list=args.as_title_list)
 
 
 def main():
