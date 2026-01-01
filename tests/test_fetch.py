@@ -170,14 +170,14 @@ class TestCli:
             "https://example.com", "output.jsonl", save_as_json=True
         )
 
-    def test_as_text(self, fetch_main, monkeypatch):
+    def test_as_title_list(self, fetch_main, monkeypatch):
         monkeypatch.setattr(
             "sys.argv",
             [
                 "recent_state_summarizer.fetch",
                 "https://example.com",
                 "output.txt",
-                "--as-text",
+                "--as-title-list",
             ],
         )
 

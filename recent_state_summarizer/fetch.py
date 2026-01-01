@@ -94,7 +94,7 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
     parser.add_argument("url", help="URL of archive page")
     parser.add_argument("save_path", help="Local file path")
     parser.add_argument(
-        "--as-text",
+        "--as-title-list",
         action="store_true",
         default=False,
         help="Save as title-only bullet list instead of JSON Lines",
@@ -106,7 +106,7 @@ def cli():
     parser = build_parser()
     args = parser.parse_args()
 
-    _main(args.url, args.save_path, save_as_json=not args.as_text)
+    _main(args.url, args.save_path, save_as_json=not args.as_title_list)
 
 
 if __name__ == "__main__":
