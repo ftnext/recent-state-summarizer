@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import argparse
 import json
+import textwrap
 from collections.abc import Generator, Iterable
 from pathlib import Path
 from typing import TypedDict
@@ -72,20 +74,17 @@ def _save(path: str | Path, contents: str) -> None:
         f.write(contents)
 
 
-if __name__ == "__main__":
-    import argparse
-    import textwrap
-
+def build_parser():
     help_message = """
-    Retrieve the titles of articles from a specified URL page
-    and save them as a list.
+    Retrieve the titles and URLs of articles from a web page specified by URL
+    and save them as JSON Lines format.
 
     Support:
         - はてなブログ（Hatena blog）
 
     Example:
         python -m recent_state_summarizer.fetch \\
-          https://awesome.hatenablog.com/archive/2023 awesome_titles.txt
+          https://awesome.hatenablog.com/archive/2023 articles.jsonl
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -94,11 +93,20 @@ if __name__ == "__main__":
     parser.add_argument("url", help="URL of archive page")
     parser.add_argument("save_path", help="Local file path")
     parser.add_argument(
-        "--as-json",
+        "--as-text",
         action="store_true",
         default=False,
-        help="Save as JSON format instead of bullet list",
+        help="Save as title-only bullet list instead of JSON Lines",
     )
+    return parser
+
+
+def cli():
+    parser = build_parser()
     args = parser.parse_args()
 
-    _main(args.url, args.save_path, args.as_json)
+    _main(args.url, args.save_path, save_as_json=not args.as_text)
+
+
+if __name__ == "__main__":
+    cli()
