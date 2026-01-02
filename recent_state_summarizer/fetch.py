@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import TypedDict
 from urllib.request import urlopen
 
+import feedparser
+import requests
 from bs4 import BeautifulSoup
 
 PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
@@ -16,6 +18,12 @@ PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
 class TitleTag(TypedDict):
     title: str
     url: str
+
+
+class BookmarkEntry(TypedDict):
+    title: str
+    url: str
+    description: str
 
 
 def _main(
@@ -74,6 +82,31 @@ def _as_json(title_tags: Iterable[TitleTag]) -> str:
 def _save(path: str | Path, contents: str) -> None:
     with open(path, "w", encoding="utf8", newline="") as f:
         f.write(contents)
+
+
+def fetch_hatena_bookmark_rss(url: str) -> list[BookmarkEntry]:
+    """Fetch entries from Hatena Bookmark RSS feed.
+
+    Args:
+        url: URL of the Hatena Bookmark RSS feed
+
+    Returns:
+        List of bookmark entries with title, url, and description
+    """
+    response = requests.get(url)
+    response.raise_for_status()
+
+    feed = feedparser.parse(response.content)
+
+    entries = []
+    for entry in feed.entries:
+        entries.append({
+            "title": entry.title,
+            "url": entry.link,
+            "description": entry.description,
+        })
+
+    return entries
 
 
 def build_parser(add_help: bool = True) -> argparse.ArgumentParser:

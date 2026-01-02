@@ -1,8 +1,9 @@
 from unittest.mock import patch
 
 import pytest
+import responses
 
-from recent_state_summarizer.fetch import _main, cli
+from recent_state_summarizer.fetch import _main, cli, fetch_hatena_bookmark_rss
 
 
 @pytest.fixture
@@ -186,3 +187,43 @@ class TestCli:
         fetch_main.assert_called_once_with(
             "https://example.com", "output.txt", save_as_title_list=True
         )
+
+
+class TestHatenaBookmarkRSS:
+    @responses.activate
+    def test_fetch_hatena_bookmark_rss(self):
+        rss_feed = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>はてなブックマーク - IT</title>
+    <link>https://b.hatena.ne.jp/entrylist/it</link>
+    <item>
+      <title>Sample Article 1</title>
+      <link>https://example.com/article1</link>
+      <description>This is a sample article description 1</description>
+    </item>
+    <item>
+      <title>Sample Article 2</title>
+      <link>https://example.com/article2</link>
+      <description>This is a sample article description 2</description>
+    </item>
+  </channel>
+</rss>"""
+        responses.add(
+            responses.GET,
+            "https://b.hatena.ne.jp/entrylist/it.rss",
+            body=rss_feed,
+            status=200,
+            content_type="application/xml",
+        )
+
+        result = fetch_hatena_bookmark_rss("https://b.hatena.ne.jp/entrylist/it.rss")
+
+        assert len(result) == 2
+        assert result[0]["title"] == "Sample Article 1"
+        assert result[0]["url"] == "https://example.com/article1"
+        assert result[0]["description"] == "This is a sample article description 1"
+        assert result[1]["title"] == "Sample Article 2"
+        assert result[1]["url"] == "https://example.com/article2"
+        assert result[1]["description"] == "This is a sample article description 2"

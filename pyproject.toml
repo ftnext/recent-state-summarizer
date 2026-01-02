@@ -24,7 +24,9 @@ classifiers = [
 ]
 dependencies = [
     "beautifulsoup4",
+    "feedparser",
     "openai<1",
+    "requests",
 ]
 dynamic = ["version"]
 
