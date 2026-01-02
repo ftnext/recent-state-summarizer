@@ -9,7 +9,7 @@ from typing import TypedDict
 from urllib.request import urlopen
 
 import feedparser
-import requests
+import httpx
 from bs4 import BeautifulSoup
 
 PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
@@ -93,7 +93,7 @@ def fetch_hatena_bookmark_rss(url: str) -> list[BookmarkEntry]:
     Returns:
         List of bookmark entries with title, url, and description
     """
-    response = requests.get(url)
+    response = httpx.get(url)
     response.raise_for_status()
 
     feed = feedparser.parse(response.content)

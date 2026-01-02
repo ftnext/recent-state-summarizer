@@ -25,13 +25,13 @@ classifiers = [
 dependencies = [
     "beautifulsoup4",
     "feedparser",
+    "httpx",
     "openai<1",
-    "requests",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
-testing = ["pytest", "pytest_httpserver", "responses"]
+testing = ["pytest", "pytest_httpserver", "respx"]
 lint = ["flake8", "black", "isort"]
 dev = ["wheel", "build", "twine"]
 

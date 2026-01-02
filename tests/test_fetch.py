@@ -1,7 +1,8 @@
 from unittest.mock import patch
 
+import httpx
 import pytest
-import responses
+import respx
 
 from recent_state_summarizer.fetch import _main, cli, fetch_hatena_bookmark_rss
 
@@ -190,7 +191,7 @@ class TestCli:
 
 
 class TestHatenaBookmarkRSS:
-    @responses.activate
+    @respx.mock
     def test_fetch_hatena_bookmark_rss(self):
         rss_feed = """\
 <?xml version="1.0" encoding="UTF-8"?>
@@ -210,12 +211,12 @@ class TestHatenaBookmarkRSS:
     </item>
   </channel>
 </rss>"""
-        responses.add(
-            responses.GET,
-            "https://b.hatena.ne.jp/entrylist/it.rss",
-            body=rss_feed,
-            status=200,
-            content_type="application/xml",
+        respx.get("https://b.hatena.ne.jp/entrylist/it.rss").mock(
+            return_value=httpx.Response(
+                status_code=200,
+                content=rss_feed.encode("utf-8"),
+                headers={"content-type": "application/xml"},
+            )
         )
 
         result = fetch_hatena_bookmark_rss("https://b.hatena.ne.jp/entrylist/it.rss")
