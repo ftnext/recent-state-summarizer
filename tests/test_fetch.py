@@ -58,7 +58,7 @@ def test_fetch_as_bullet_list(blog_server, tmp_path):
 def test_fetch_as_json(blog_server, tmp_path):
     _main(
         blog_server.url_for("/archive/2025/06"),
-        tmp_path / "titles.json",
+        tmp_path / "titles.jsonl",
         save_as_title_list=False,
     )
 
@@ -66,7 +66,7 @@ def test_fetch_as_json(blog_server, tmp_path):
 {{"title": "Title 3", "url": "{blog_server.url_for('/archive/2025/06/03')}"}}
 {{"title": "Title 2", "url": "{blog_server.url_for('/archive/2025/06/02')}"}}
 {{"title": "Title 1", "url": "{blog_server.url_for('/archive/2025/06/01')}"}}"""
-    assert (tmp_path / "titles.json").read_text(encoding="utf8") == expected
+    assert (tmp_path / "titles.jsonl").read_text(encoding="utf8") == expected
 
 
 @pytest.fixture
