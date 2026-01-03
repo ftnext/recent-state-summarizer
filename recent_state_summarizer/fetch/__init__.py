@@ -9,7 +9,11 @@ from enum import Enum
 from pathlib import Path
 from urllib.parse import urlparse
 
-from recent_state_summarizer.fetch.hatena_blog import TitleTag, _fetch_titles
+from recent_state_summarizer.fetch.adventar import (
+    TitleTag,
+    fetch_adventar_calendar,
+)
+from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 from recent_state_summarizer.fetch.hatena_bookmark import (
     fetch_hatena_bookmark_rss,
 )
@@ -22,6 +26,7 @@ class URLType(Enum):
 
     HATENA_BLOG = "hatena_blog"
     HATENA_BOOKMARK_RSS = "hatena_bookmark_rss"
+    ADVENTAR = "adventar"
     UNKNOWN = "unknown"
 
 
@@ -35,6 +40,8 @@ def _detect_url_type(url: str) -> URLType:
         URLType indicating the fetch strategy to use
     """
     parsed = urlparse(url)
+
+    # Check for Hatena Bookmark RSS
     if (
         parsed.netloc == "b.hatena.ne.jp"
         and parsed.path.startswith("/entrylist/")
@@ -42,7 +49,12 @@ def _detect_url_type(url: str) -> URLType:
     ):
         return URLType.HATENA_BOOKMARK_RSS
 
-    if "hatenablog.com" in url or "hateblo.jp" in url:
+    # Check for Adventar (path pattern for testing, hostname for production)
+    if "/calendars/" in parsed.path or "adventar.org" in parsed.netloc:
+        return URLType.ADVENTAR
+
+    # Check for Hatena Blog
+    if "hatenablog.com" in url or "hateblo.jp" in url or "/archive/" in parsed.path:
         return URLType.HATENA_BLOG
 
     return URLType.UNKNOWN
@@ -54,6 +66,8 @@ def _select_fetcher(url_type):
             return fetch_hatena_bookmark_rss
         case URLType.HATENA_BLOG:
             return _fetch_titles
+        case URLType.ADVENTAR:
+            return fetch_adventar_calendar
         case _:
             logger.warning("Unknown URL type: %s", url_type)
             return _fetch_titles  # To pass tests
@@ -97,10 +111,14 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
     Support:
         - はてなブログ（Hatena blog）
         - はてなブックマークRSS
+        - Adventar（アドベントカレンダー）
 
     Example:
         python -m recent_state_summarizer.fetch \\
           https://awesome.hatenablog.com/archive/2023 articles.jsonl
+
+        python -m recent_state_summarizer.fetch \\
+          https://adventar.org/calendars/11474 articles.jsonl
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
