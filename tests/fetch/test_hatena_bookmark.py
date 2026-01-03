@@ -9,22 +9,29 @@ class TestHatenaBookmarkRSS:
     def test_fetch_hatena_bookmark_rss(self):
         rss_feed = """\
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>はてなブックマーク - IT</title>
+<rdf:RDF>
+  <channel rdf:about="https://b.hatena.ne.jp/entrylist/it">
+    <title>はてなブックマーク - 新着エントリー - テクノロジー</title>
     <link>https://b.hatena.ne.jp/entrylist/it</link>
-    <item>
-      <title>Sample Article 1</title>
-      <link>https://example.com/article1</link>
-      <description>This is a sample article description 1</description>
-    </item>
-    <item>
-      <title>Sample Article 2</title>
-      <link>https://example.com/article2</link>
-      <description>This is a sample article description 2</description>
-    </item>
+    <description>新着エントリー</description>
+    <items>
+      <rdf:Seq>
+        <rdf:li rdf:resource="https://example.com/article1"/>
+        <rdf:li rdf:resource="https://example.com/article2"/>
+      </rdf:Seq>
+    </items>
   </channel>
-</rss>"""
+  <item rdf:about="https://example.com/article1">
+    <title>Sample Article 1</title>
+    <link>https://example.com/article1</link>
+    <description>This is a sample article description 1</description>
+  </item>
+  <item rdf:about="https://example.com/article2">
+    <title>Sample Article 2</title>
+    <link>https://example.com/article2</link>
+    <description>This is a sample article description 2</description>
+  </item>
+</rdf:RDF>"""
         respx.get("https://b.hatena.ne.jp/entrylist/it.rss").mock(
             return_value=httpx.Response(
                 status_code=200,
