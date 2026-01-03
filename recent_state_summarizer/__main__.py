@@ -1,10 +1,10 @@
 import argparse
 import sys
+import tempfile
 from textwrap import dedent
 
 from recent_state_summarizer.fetch import _main as fetch_main
 from recent_state_summarizer.fetch import build_parser as build_fetch_parser
-from recent_state_summarizer.fetch import fetch_titles_as_bullet_list
 from recent_state_summarizer.summarize import summarize_titles
 
 
@@ -42,7 +42,10 @@ def parse_args():
 
 
 def run_cli(args):
-    titles = fetch_titles_as_bullet_list(args.url)
+    with tempfile.NamedTemporaryFile(mode="w+") as tempf:
+        fetch_main(args.url, tempf.name, save_as_title_list=True)
+        tempf.seek(0)
+        titles = tempf.read()
     summary = summarize_titles(titles)
     print(summary)
 
