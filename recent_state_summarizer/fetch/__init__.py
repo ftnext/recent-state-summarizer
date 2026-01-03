@@ -96,6 +96,7 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
 
     Support:
         - はてなブログ（Hatena blog）
+        - はてなブックマークRSS
 
     Example:
         python -m recent_state_summarizer.fetch \\

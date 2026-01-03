@@ -22,6 +22,7 @@ def parse_args():
 
     Support:
         - はてなブログ（Hatena blog）
+        - はてなブックマークRSS
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
