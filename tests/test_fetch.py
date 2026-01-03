@@ -225,8 +225,10 @@ class TestHatenaBookmarkRSS:
             )
         )
 
-        result = fetch_hatena_bookmark_rss(
-            "https://b.hatena.ne.jp/entrylist/it.rss"
+        result = list(
+            fetch_hatena_bookmark_rss(
+                "https://b.hatena.ne.jp/entrylist/it.rss"
+            )
         )
 
         assert len(result) == 2

@@ -133,31 +133,28 @@ def _save(path: str | Path, contents: str) -> None:
         f.write(contents)
 
 
-def fetch_hatena_bookmark_rss(url: str) -> list[BookmarkEntry]:
+def fetch_hatena_bookmark_rss(
+    url: str,
+) -> Generator[BookmarkEntry, None, None]:
     """Fetch entries from Hatena Bookmark RSS feed.
 
     Args:
         url: URL of the Hatena Bookmark RSS feed
 
-    Returns:
-        List of bookmark entries with title, url, and description
+    Yields:
+        Bookmark entries with title, url, and description
     """
     response = httpx.get(url)
     response.raise_for_status()
 
     feed = feedparser.parse(response.content)
 
-    entries = []
     for entry in feed.entries:
-        entries.append(
-            {
-                "title": entry.title,
-                "url": entry.link,
-                "description": entry.description,
-            }
-        )
-
-    return entries
+        yield {
+            "title": entry.title,
+            "url": entry.link,
+            "description": entry.description,
+        }
 
 
 def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
