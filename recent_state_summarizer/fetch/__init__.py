@@ -4,16 +4,15 @@ import argparse
 import json
 import logging
 import textwrap
-from collections.abc import Generator, Iterable
+from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
-from typing import TypedDict
 from urllib.parse import urlparse
 
-import feedparser
-import httpx
-
 from recent_state_summarizer.fetch.hatena_blog import TitleTag, _fetch_titles
+from recent_state_summarizer.fetch.hatena_bookmark import (
+    fetch_hatena_bookmark_rss,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -60,12 +59,6 @@ def _select_fetcher(url_type):
             return _fetch_titles  # To pass tests
 
 
-class BookmarkEntry(TypedDict):
-    title: str
-    url: str
-    description: str
-
-
 def _main(
     url: str, save_path: str | Path, *, save_as_title_list: bool
 ) -> None:
@@ -94,30 +87,6 @@ def _as_json(title_tags: Iterable[TitleTag]) -> str:
 def _save(path: str | Path, contents: str) -> None:
     with open(path, "w", encoding="utf8", newline="") as f:
         f.write(contents)
-
-
-def fetch_hatena_bookmark_rss(
-    url: str,
-) -> Generator[BookmarkEntry, None, None]:
-    """Fetch entries from Hatena Bookmark RSS feed.
-
-    Args:
-        url: URL of the Hatena Bookmark RSS feed
-
-    Yields:
-        Bookmark entries with title, url, and description
-    """
-    response = httpx.get(url)
-    response.raise_for_status()
-
-    feed = feedparser.parse(response.content)
-
-    for entry in feed.entries:
-        yield {
-            "title": entry.title,
-            "url": entry.link,
-            "description": entry.description,
-        }
 
 
 def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
