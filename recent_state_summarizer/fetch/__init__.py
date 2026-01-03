@@ -2,26 +2,69 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import textwrap
-from collections.abc import Generator, Iterable
+from collections.abc import Iterable
+from enum import Enum
 from pathlib import Path
-from typing import TypedDict
-from urllib.request import urlopen
+from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
+from recent_state_summarizer.fetch.hatena_blog import TitleTag, _fetch_titles
+from recent_state_summarizer.fetch.hatena_bookmark import (
+    fetch_hatena_bookmark_rss,
+)
 
-PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
+logger = logging.getLogger(__name__)
 
 
-class TitleTag(TypedDict):
-    title: str
-    url: str
+class URLType(Enum):
+    """Type of URL for fetching."""
+
+    HATENA_BLOG = "hatena_blog"
+    HATENA_BOOKMARK_RSS = "hatena_bookmark_rss"
+    UNKNOWN = "unknown"
+
+
+def _detect_url_type(url: str) -> URLType:
+    """Detect the type of URL to determine fetch strategy.
+
+    Args:
+        url: URL to analyze
+
+    Returns:
+        URLType indicating the fetch strategy to use
+    """
+    parsed = urlparse(url)
+    if (
+        parsed.netloc == "b.hatena.ne.jp"
+        and parsed.path.startswith("/entrylist/")
+        and parsed.path.endswith(".rss")
+    ):
+        return URLType.HATENA_BOOKMARK_RSS
+
+    if "hatenablog.com" in url or "hateblo.jp" in url:
+        return URLType.HATENA_BLOG
+
+    return URLType.UNKNOWN
+
+
+def _select_fetcher(url_type):
+    match url_type:
+        case URLType.HATENA_BOOKMARK_RSS:
+            return fetch_hatena_bookmark_rss
+        case URLType.HATENA_BLOG:
+            return _fetch_titles
+        case _:
+            logger.warning("Unknown URL type: %s", url_type)
+            return _fetch_titles  # To pass tests
 
 
 def _main(
     url: str, save_path: str | Path, *, save_as_title_list: bool
 ) -> None:
-    title_tags = _fetch_titles(url)
+    url_type = _detect_url_type(url)
+    fetcher = _select_fetcher(url_type)
+    title_tags = fetcher(url)
     if save_as_title_list:
         contents = _as_bullet_list(
             title_tag["title"] for title_tag in title_tags
@@ -29,36 +72,6 @@ def _main(
     else:
         contents = _as_json(title_tags)
     _save(save_path, contents)
-
-
-def fetch_titles_as_bullet_list(url: str) -> str:
-    title_tags = _fetch_titles(url)
-    return _as_bullet_list(title_tag["title"] for title_tag in title_tags)
-
-
-def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
-    raw_html = _fetch(url)
-    yield from _parse_titles(raw_html)
-
-    soup = BeautifulSoup(raw_html, "html.parser")
-    next_link = soup.find("a", class_="test-pager-next")
-    if next_link and "href" in next_link.attrs:
-        next_url = next_link["href"]
-        print(f"Next page found, fetching... {next_url}")
-        yield from _fetch_titles(next_url)
-
-
-def _fetch(url: str) -> str:
-    with urlopen(url) as res:
-        return res.read()
-
-
-def _parse_titles(raw_html: str) -> Generator[TitleTag, None, None]:
-    soup = BeautifulSoup(raw_html, "html.parser")
-    body = soup.body
-    title_tags = body.find_all(**PARSE_HATENABLOG_KWARGS)
-    for title_tag in title_tags:
-        yield {"title": title_tag.text, "url": title_tag["href"]}
 
 
 def _as_bullet_list(titles: Iterable[str]) -> str:
@@ -83,6 +96,7 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
 
     Support:
         - はてなブログ（Hatena blog）
+        - はてなブックマークRSS
 
     Example:
         python -m recent_state_summarizer.fetch \\

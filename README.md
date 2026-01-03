@@ -28,6 +28,7 @@ $ omae-douyo https://nikkie-ftnext.hatenablog.com/archive/2023/4
 Currently support:
 
 - はてなブログ（Hatena blog）
+- はてなブックマークRSS
 
 To see help, type `omae-douyo -h`.
 

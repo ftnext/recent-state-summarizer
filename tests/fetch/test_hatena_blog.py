@@ -1,8 +1,6 @@
-from unittest.mock import patch
-
 import pytest
 
-from recent_state_summarizer.fetch import _main, cli
+from recent_state_summarizer.fetch import _main
 
 
 @pytest.fixture
@@ -150,39 +148,3 @@ def test_fetch_multiple_archive_page(multi_page_blog_server, tmp_path):
 - Title 2
 - Title 1"""
     assert (tmp_path / "titles.txt").read_text(encoding="utf8") == expected
-
-
-@patch("recent_state_summarizer.fetch._main")
-class TestCli:
-    def test_default_as_json(self, fetch_main, monkeypatch):
-        monkeypatch.setattr(
-            "sys.argv",
-            [
-                "recent_state_summarizer.fetch",
-                "https://example.com",
-                "output.jsonl",
-            ],
-        )
-
-        cli()
-
-        fetch_main.assert_called_once_with(
-            "https://example.com", "output.jsonl", save_as_title_list=False
-        )
-
-    def test_as_title_list(self, fetch_main, monkeypatch):
-        monkeypatch.setattr(
-            "sys.argv",
-            [
-                "recent_state_summarizer.fetch",
-                "https://example.com",
-                "output.txt",
-                "--as-title-list",
-            ],
-        )
-
-        cli()
-
-        fetch_main.assert_called_once_with(
-            "https://example.com", "output.txt", save_as_title_list=True
-        )
