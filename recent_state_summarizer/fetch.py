@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import textwrap
 from collections.abc import Generator, Iterable
+from enum import Enum
 from pathlib import Path
 from typing import TypedDict
+from urllib.parse import urlparse
 from urllib.request import urlopen
 
 import feedparser
@@ -13,6 +16,50 @@ import httpx
 from bs4 import BeautifulSoup
 
 PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
+
+logger = logging.getLogger(__name__)
+
+
+class URLType(Enum):
+    """Type of URL for fetching."""
+
+    HATENA_BLOG = "hatena_blog"
+    HATENA_BOOKMARK_RSS = "hatena_bookmark_rss"
+    UNKNOWN = "unknown"
+
+
+def _detect_url_type(url: str) -> URLType:
+    """Detect the type of URL to determine fetch strategy.
+
+    Args:
+        url: URL to analyze
+
+    Returns:
+        URLType indicating the fetch strategy to use
+    """
+    parsed = urlparse(url)
+    if (
+        parsed.netloc == "b.hatena.ne.jp"
+        and parsed.path.startswith("/entrylist/")
+        and parsed.path.endswith(".rss")
+    ):
+        return URLType.HATENA_BOOKMARK_RSS
+
+    if "hatenablog.com" in url or "hateblo.jp" in url:
+        return URLType.HATENA_BLOG
+
+    return URLType.UNKNOWN
+
+
+def _select_fetcher(url_type):
+    match url_type:
+        case URLType.HATENA_BOOKMARK_RSS:
+            return fetch_hatena_bookmark_rss
+        case URLType.HATENA_BLOG:
+            return _fetch_titles
+        case _:
+            logger.warning("Unknown URL type: %s", url_type)
+            return _fetch_titles  # To pass tests
 
 
 class TitleTag(TypedDict):
@@ -29,7 +76,9 @@ class BookmarkEntry(TypedDict):
 def _main(
     url: str, save_path: str | Path, *, save_as_title_list: bool
 ) -> None:
-    title_tags = _fetch_titles(url)
+    url_type = _detect_url_type(url)
+    fetcher = _select_fetcher(url_type)
+    title_tags = fetcher(url)
     if save_as_title_list:
         contents = _as_bullet_list(
             title_tag["title"] for title_tag in title_tags
@@ -100,11 +149,13 @@ def fetch_hatena_bookmark_rss(url: str) -> list[BookmarkEntry]:
 
     entries = []
     for entry in feed.entries:
-        entries.append({
-            "title": entry.title,
-            "url": entry.link,
-            "description": entry.description,
-        })
+        entries.append(
+            {
+                "title": entry.title,
+                "url": entry.link,
+                "description": entry.description,
+            }
+        )
 
     return entries
 

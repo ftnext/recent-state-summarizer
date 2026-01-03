@@ -4,7 +4,13 @@ import httpx
 import pytest
 import respx
 
-from recent_state_summarizer.fetch import _main, cli, fetch_hatena_bookmark_rss
+from recent_state_summarizer.fetch import (
+    URLType,
+    _detect_url_type,
+    _main,
+    cli,
+    fetch_hatena_bookmark_rss,
+)
 
 
 @pytest.fixture
@@ -219,12 +225,38 @@ class TestHatenaBookmarkRSS:
             )
         )
 
-        result = fetch_hatena_bookmark_rss("https://b.hatena.ne.jp/entrylist/it.rss")
+        result = fetch_hatena_bookmark_rss(
+            "https://b.hatena.ne.jp/entrylist/it.rss"
+        )
 
         assert len(result) == 2
         assert result[0]["title"] == "Sample Article 1"
         assert result[0]["url"] == "https://example.com/article1"
-        assert result[0]["description"] == "This is a sample article description 1"
+        assert (
+            result[0]["description"]
+            == "This is a sample article description 1"
+        )
         assert result[1]["title"] == "Sample Article 2"
         assert result[1]["url"] == "https://example.com/article2"
-        assert result[1]["description"] == "This is a sample article description 2"
+        assert (
+            result[1]["description"]
+            == "This is a sample article description 2"
+        )
+
+
+class TestDetectUrlType:
+    def test_hatena_bookmark_rss(self):
+        url = "https://b.hatena.ne.jp/entrylist/it.rss"
+        assert _detect_url_type(url) == URLType.HATENA_BOOKMARK_RSS
+
+    def test_hatena_blog_hatenablog_com(self):
+        url = "https://example.hatenablog.com/archive/2023"
+        assert _detect_url_type(url) == URLType.HATENA_BLOG
+
+    def test_hatena_blog_hateblo_jp(self):
+        url = "https://example.hateblo.jp/archive/2023"
+        assert _detect_url_type(url) == URLType.HATENA_BLOG
+
+    def test_unknown_url(self):
+        url = "https://example.com/blog"
+        assert _detect_url_type(url) == URLType.UNKNOWN
