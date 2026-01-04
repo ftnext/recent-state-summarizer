@@ -29,7 +29,7 @@ Currently support:
 
 - はてなブログ（Hatena blog）
 - はてなブックマークRSS
-- Adventar（アドベントカレンダー）
+- Adventar
 
 To see help, type `omae-douyo -h`.
 
@@ -40,11 +40,9 @@ Fetch titles and URLs of articles, and save them to a file without summarization
 ```
 # Save as JSON format (default)
 $ omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 articles.jsonl
-$ omae-douyo fetch https://adventar.org/calendars/11474 articles.jsonl
 
 # Save as bullet list
 $ omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 titles.txt --as-title-list
-$ omae-douyo fetch https://adventar.org/calendars/11474 titles.txt --as-title-list
 ```
 
 ## Development

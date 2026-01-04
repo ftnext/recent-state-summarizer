@@ -24,7 +24,7 @@ def parse_args():
     Support:
         - はてなブログ（Hatena blog）
         - はてなブックマークRSS
-        - Adventar（アドベントカレンダー）
+        - Adventar
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,

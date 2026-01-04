@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from typing import TypedDict
-from urllib.request import urlopen
 
+import httpx
 from bs4 import BeautifulSoup
 
 
@@ -11,8 +11,9 @@ class TitleTag(TypedDict):
 
 
 def _fetch(url: str) -> str:
-    with urlopen(url) as res:
-        return res.read()
+    response = httpx.get(url)
+    response.raise_for_status()
+    return response.text
 
 
 def fetch_adventar_calendar(url: str) -> Generator[TitleTag, None, None]:
@@ -49,7 +50,6 @@ def _parse_titles(raw_html: str) -> Generator[TitleTag, None, None]:
         if not link or "href" not in link.attrs:
             continue
 
-        # Get title from the next div sibling or link text
         title_div = link_div.find_next_sibling("div")
         if title_div and title_div.text.strip():
             title = title_div.text.strip()
