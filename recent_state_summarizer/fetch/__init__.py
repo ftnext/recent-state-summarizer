@@ -67,7 +67,7 @@ def _select_fetcher(url_type):
             return fetch_adventar_calendar
         case _:
             logger.warning("Unknown URL type: %s", url_type)
-            return _fetch_titles
+            return _fetch_titles  # To pass tests
 
 
 def _main(
