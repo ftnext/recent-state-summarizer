@@ -139,6 +139,17 @@ Test structure mirrors source code:
 
 Version is stored in `recent_state_summarizer/__init__.py` as `__version__` and referenced by `pyproject.toml` using setuptools dynamic versioning.
 
+### Bumping Version
+
+```bash
+# 1. Edit version in recent_state_summarizer/__init__.py
+# 2. Commit and tag
+git add recent_state_summarizer/__init__.py
+git commit -m "chore: Bump up X.Y.Z"
+git tag vX.Y.Z
+git push origin main --tags
+```
+
 ## Development Guidelines
 
 ### Code Style
