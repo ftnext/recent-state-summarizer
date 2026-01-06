@@ -1,0 +1,147 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+`recent-state-summarizer` (a.k.a. "RSS") is a Python CLI tool that fetches blog article titles from various sources and uses the OpenAI API to summarize what the author has been doing recently. It currently supports:
+- Hatena Blog (はてなブログ)
+- Hatena Bookmark RSS
+- Adventar calendars
+
+The main CLI command is `omae-douyo` which fetches titles and generates a summary in Japanese.
+
+## Development Commands
+
+### Environment Setup
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.lock
+pip install -e '.[testing]'
+```
+
+### Running Tests
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run a single test file
+python -m pytest tests/test_main.py -v
+
+# Run a specific test
+python -m pytest tests/test_main.py::test_main_success_path -v
+```
+
+### Using the CLI
+```bash
+# Set OpenAI API key first
+export OPENAI_API_KEY=your-key-here
+
+# Fetch and summarize
+omae-douyo https://nikkie-ftnext.hatenablog.com/archive/2023/4
+
+# Fetch only (save as JSON Lines)
+omae-douyo fetch https://example.com/archive/2023 articles.jsonl
+
+# Fetch only (save as title list)
+omae-douyo fetch https://example.com/archive/2023 titles.txt --as-title-list
+```
+
+### Development Sub-commands
+```bash
+# Run fetch module directly
+python -m recent_state_summarizer.fetch -h
+
+# Run summarize module directly (useful for prompt tuning)
+python -m recent_state_summarizer.summarize -h
+```
+
+## Architecture
+
+### Command Flow
+
+The tool has two main paths:
+
+1. **Full flow (default)**: URL → Fetch titles → Summarize → Print summary
+   - Entry: `__main__.py:main()` → `run_cli()`
+   - Uses a temporary file to pass titles between fetch and summarize
+
+2. **Fetch-only flow**: URL → Fetch titles → Save to file
+   - Entry: `__main__.py:main()` → `fetch_cli()`
+   - Saves as JSON Lines or bullet list format
+
+The CLI automatically inserts the "run" subcommand if no known subcommand is provided, allowing `omae-douyo <url>` to work as a shortcut.
+
+### Fetcher System
+
+The fetcher system uses a strategy pattern based on URL detection:
+
+1. **URL Detection** (`fetch/__init__.py:_detect_url_type()`):
+   - Analyzes URL to determine source type
+   - Returns `URLType` enum (HATENA_BLOG, HATENA_BOOKMARK_RSS, ADVENTAR, UNKNOWN)
+
+2. **Fetcher Selection** (`fetch/__init__.py:_select_fetcher()`):
+   - Maps `URLType` to appropriate fetcher function
+   - Uses Python 3.10+ match/case statement
+
+3. **Fetcher Implementations**:
+   - `hatena_blog.py`: Parses HTML with BeautifulSoup, recursively follows pagination
+   - `hatena_bookmark.py`: Parses RSS feeds with feedparser
+   - `adventar.py`: Uses httpx + BeautifulSoup to parse Adventar calendar pages
+
+All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
+
+### Summarization
+
+`summarize.py` uses the OpenAI API (legacy v0.28.x):
+- Model: `gpt-3.5-turbo`
+- Prompt is in Japanese, asks for summary of what the author has been doing
+- Temperature: 0.0 (deterministic)
+- API uses old `openai.ChatCompletion.create()` interface (pre-v1.0)
+
+### Data Formats
+
+**TitleTag TypedDict**:
+```python
+{
+    "title": str,  # Article title
+    "url": str     # Article URL
+}
+```
+
+**Output formats**:
+- JSON Lines: One TitleTag JSON per line
+- Bullet list: Plain text with "- " prefix per title
+
+## Testing
+
+Tests use:
+- `pytest` as the test runner
+- `pytest_httpserver` for mocking Hatena Blog HTTP responses
+- `responses` for mocking OpenAI API calls
+- `respx` for mocking httpx calls
+
+Test structure mirrors source code:
+- `tests/test_main.py`: End-to-end CLI tests
+- `tests/fetch/test_*.py`: Individual fetcher tests
+- `tests/fetch/test_core.py`: URL detection and fetcher selection tests
+
+## Key Dependencies
+
+- `beautifulsoup4`: HTML parsing for Hatena Blog and Adventar
+- `feedparser`: RSS parsing for Hatena Bookmark
+- `httpx`: HTTP client for Adventar (supports async, though not currently used)
+- `openai<1`: Legacy OpenAI API (pre-v1.0)
+- `urllib.request.urlopen`: Used by Hatena Blog fetcher only
+
+## Version Management
+
+Version is stored in `recent_state_summarizer/__init__.py` as `__version__` and referenced by `pyproject.toml` using setuptools dynamic versioning.
+
+## Development Guidelines
+
+### Code Style
+
+- **Avoid comments**: Express code intent through descriptive function and variable names rather than comments. The code should be self-documenting.
+- **Minimize diffs**: Keep code changes minimal and focused. Avoid unnecessary refactoring or reformatting when making specific changes.
