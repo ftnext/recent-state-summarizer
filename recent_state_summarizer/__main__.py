@@ -16,7 +16,6 @@ def parse_args():
 
     Example:
         omae-douyo https://awesome.hatenablog.com/archive/2023
-        omae-douyo https://adventar.org/calendars/11474
 
     Retrieve the titles of articles from a specified URL.
     After summarization, prints the summary.

@@ -40,7 +40,6 @@ def _detect_url_type(url: str) -> URLType:
         URLType indicating the fetch strategy to use
     """
     parsed = urlparse(url)
-
     if (
         parsed.netloc == "b.hatena.ne.jp"
         and parsed.path.startswith("/entrylist/")
