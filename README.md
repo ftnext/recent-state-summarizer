@@ -29,6 +29,7 @@ Currently support:
 
 - はてなブログ（Hatena blog）
 - はてなブックマークRSS
+- Adventar
 
 To see help, type `omae-douyo -h`.
 
