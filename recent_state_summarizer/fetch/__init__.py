@@ -65,8 +65,7 @@ def _select_fetcher(url_type):
         case URLType.ADVENTAR:
             return fetch_adventar_calendar
         case _:
-            logger.warning("Unknown URL type: %s", url_type)
-            return _fetch_titles  # To pass tests
+            raise ValueError(f"Unsupported URL type: {url_type}")
 
 
 def _main(
