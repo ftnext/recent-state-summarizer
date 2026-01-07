@@ -118,7 +118,6 @@ All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
 
 Tests use:
 - `pytest` as the test runner
-- `pytest_httpserver` for mocking Hatena Blog HTTP responses
 - `responses` for mocking OpenAI API calls
 - `respx` for mocking httpx calls
 

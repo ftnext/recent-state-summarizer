@@ -31,7 +31,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-testing = ["pytest", "pytest_httpserver", "responses", "respx"]
+testing = ["pytest", "responses", "respx"]
 lint = ["flake8", "black", "isort"]
 dev = ["wheel", "build", "twine"]
 

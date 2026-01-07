@@ -1,12 +1,17 @@
-import pytest
+import respx
+from httpx import Response
 
 from recent_state_summarizer.fetch import _main
 
 
-@pytest.fixture
-def blog_server(httpserver):
-    httpserver.expect_request("/archive/2025/06").respond_with_data(
-        f"""\
+@respx.mock
+def test_fetch_as_bullet_list(tmp_path):
+    base_url = "https://example.com"
+
+    respx.get(f"{base_url}/archive/2025/06").mock(
+        return_value=Response(
+            200,
+            text=f"""\
 <!DOCTYPE html>
 <html>
   <head><title>Archive</title></head>
@@ -19,13 +24,13 @@ def blog_server(httpserver):
             <div id="main-inner">
               <div class="archive-entries">
                 <section class="archive-entry">
-                  <a class="entry-title-link" href="{httpserver.url_for('/')}archive/2025/06/03">Title 3</a>
+                  <a class="entry-title-link" href="{base_url}/archive/2025/06/03">Title 3</a>
                 </section>
                 <section class="archive-entry">
-                  <a class="entry-title-link" href="{httpserver.url_for('/')}archive/2025/06/02">Title 2</a>
+                  <a class="entry-title-link" href="{base_url}/archive/2025/06/02">Title 2</a>
                 </section>
                 <section class="archive-entry">
-                  <a class="entry-title-link" href="{httpserver.url_for('/')}archive/2025/06/01">Title 1</a>
+                  <a class="entry-title-link" href="{base_url}/archive/2025/06/01">Title 1</a>
                 </section>
               </div>
             </div>
@@ -34,14 +39,12 @@ def blog_server(httpserver):
       </div>
     </div>
   </body>
-</html>"""
+</html>""",
+        )
     )
-    return httpserver
 
-
-def test_fetch_as_bullet_list(blog_server, tmp_path):
     _main(
-        blog_server.url_for("/archive/2025/06"),
+        f"{base_url}/archive/2025/06",
         tmp_path / "titles.txt",
         save_as_title_list=True,
     )
@@ -53,26 +56,66 @@ def test_fetch_as_bullet_list(blog_server, tmp_path):
     assert (tmp_path / "titles.txt").read_text(encoding="utf8") == expected
 
 
-def test_fetch_as_json(blog_server, tmp_path):
+@respx.mock
+def test_fetch_as_json(tmp_path):
+    base_url = "https://example.com"
+
+    respx.get(f"{base_url}/archive/2025/06").mock(
+        return_value=Response(
+            200,
+            text=f"""\
+<!DOCTYPE html>
+<html>
+  <head><title>Archive</title></head>
+  <body>
+    <h1>Archive</h1>
+    <div id="content">
+      <div id="content-inner">
+        <div id="wrapper">
+          <div id="main">
+            <div id="main-inner">
+              <div class="archive-entries">
+                <section class="archive-entry">
+                  <a class="entry-title-link" href="{base_url}/archive/2025/06/03">Title 3</a>
+                </section>
+                <section class="archive-entry">
+                  <a class="entry-title-link" href="{base_url}/archive/2025/06/02">Title 2</a>
+                </section>
+                <section class="archive-entry">
+                  <a class="entry-title-link" href="{base_url}/archive/2025/06/01">Title 1</a>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>""",
+        )
+    )
+
     _main(
-        blog_server.url_for("/archive/2025/06"),
+        f"{base_url}/archive/2025/06",
         tmp_path / "titles.jsonl",
         save_as_title_list=False,
     )
 
     expected = f"""\
-{{"title": "Title 3", "url": "{blog_server.url_for('/archive/2025/06/03')}"}}
-{{"title": "Title 2", "url": "{blog_server.url_for('/archive/2025/06/02')}"}}
-{{"title": "Title 1", "url": "{blog_server.url_for('/archive/2025/06/01')}"}}"""
+{{"title": "Title 3", "url": "{base_url}/archive/2025/06/03"}}
+{{"title": "Title 2", "url": "{base_url}/archive/2025/06/02"}}
+{{"title": "Title 1", "url": "{base_url}/archive/2025/06/01"}}"""
     assert (tmp_path / "titles.jsonl").read_text(encoding="utf8") == expected
 
 
-@pytest.fixture
-def multi_page_blog_server(httpserver):
-    httpserver.expect_request(
-        "/archive/2025/07", query_string="page=2"
-    ).respond_with_data(
-        f"""\
+@respx.mock
+def test_fetch_multiple_archive_page(tmp_path):
+    base_url = "https://example.com"
+
+    respx.get(f"{base_url}/archive/2025/07", params="page=2").mock(
+        return_value=Response(
+            200,
+            text=f"""\
 <!DOCTYPE html>
 <html>
   <head><title>Archive (Page 2)</title></head>
@@ -85,12 +128,12 @@ def multi_page_blog_server(httpserver):
             <div id="main-inner">
               <div class="archive-entries">
                 <section class="archive-entry">
-                  <a class="entry-title-link" href="{httpserver.url_for('/')}archive/2025/07/01">Title 1</a>
+                  <a class="entry-title-link" href="{base_url}/archive/2025/07/01">Title 1</a>
                 </section>
               </div>
               <div class="pager">
                 <span class="pager-prev">
-                  <a href="{httpserver.url_for('/')}archive/2025/07" class="test-pager-prev" rel="prev">前のページ</a>
+                  <a href="{base_url}/archive/2025/07" class="test-pager-prev" rel="prev">前のページ</a>
                 </span>
               </div>
             </div>
@@ -99,10 +142,14 @@ def multi_page_blog_server(httpserver):
       </div>
     </div>
   </body>
-</html>"""
+</html>""",
+        )
     )
-    httpserver.expect_request("/archive/2025/07").respond_with_data(
-        f"""\
+
+    respx.get(f"{base_url}/archive/2025/07").mock(
+        return_value=Response(
+            200,
+            text=f"""\
 <!DOCTYPE html>
 <html>
   <head><title>Archive</title></head>
@@ -115,16 +162,16 @@ def multi_page_blog_server(httpserver):
             <div id="main-inner">
               <div class="archive-entries">
                 <section class="archive-entry">
-                  <a class="entry-title-link" href="{httpserver.url_for('/')}archive/2025/07/03">Title 3</a>
+                  <a class="entry-title-link" href="{base_url}/archive/2025/07/03">Title 3</a>
                 </section>
                 <section class="archive-entry">
-                  <a class="entry-title-link" href="{httpserver.url_for('/')}archive/2025/07/02">Title 2</a>
+                  <a class="entry-title-link" href="{base_url}/archive/2025/07/02">Title 2</a>
                 </section>
               </div>
             </div>
             <div class="pager">
               <span class="pager-next">
-                <a href="{httpserver.url_for('/')}archive/2025/07?page=2" class="test-pager-next" rel="next">次のページ</a>
+                <a href="{base_url}/archive/2025/07?page=2" class="test-pager-next" rel="next">次のページ</a>
               </span>
             </div>
           </div>
@@ -132,14 +179,12 @@ def multi_page_blog_server(httpserver):
       </div>
     </div>
   </body>
-</html>"""
+</html>""",
+        )
     )
-    return httpserver
 
-
-def test_fetch_multiple_archive_page(multi_page_blog_server, tmp_path):
     _main(
-        multi_page_blog_server.url_for("/archive/2025/07"),
+        f"{base_url}/archive/2025/07",
         tmp_path / "titles.txt",
         save_as_title_list=True,
     )
