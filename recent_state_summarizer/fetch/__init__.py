@@ -50,7 +50,11 @@ def _detect_url_type(url: str) -> URLType:
     if "/calendars/" in parsed.path or "adventar.org" in parsed.netloc:
         return URLType.ADVENTAR
 
-    if "hatenablog.com" in url or "hateblo.jp" in url or "/archive/" in parsed.path:
+    if (
+        "hatenablog.com" in url
+        or "hateblo.jp" in url
+        or "/archive/" in parsed.path
+    ):
         return URLType.HATENA_BLOG
 
     return URLType.UNKNOWN
