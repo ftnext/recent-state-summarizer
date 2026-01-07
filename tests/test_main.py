@@ -1,42 +1,45 @@
 import json
 from unittest.mock import patch
 
-import pytest
+import httpx
 import responses
+import respx
 
 from recent_state_summarizer.__main__ import main
 
 
-@pytest.fixture
-def blog_server(httpserver):
-    httpserver.expect_request("/archive/2025").respond_with_data(
-        f"""\
+@respx.mock
+@responses.activate
+def test_main_success_path(monkeypatch, capsys):
+    html_response = """\
 <!DOCTYPE html>
 <html>
   <body>
     <div class="archive-entries">
       <section class="archive-entry">
-        <a class="entry-title-link" href="{httpserver.url_for('/post1')}">Pythonのテストについて学ぶ</a>
+        <a class="entry-title-link" href="https://nikkie-ftnext.hatenablog.com/entry/post1">Pythonのテストについて学ぶ</a>
       </section>
       <section class="archive-entry">
-        <a class="entry-title-link" href="{httpserver.url_for('/post2')}">pytest入門</a>
+        <a class="entry-title-link" href="https://nikkie-ftnext.hatenablog.com/entry/post2">pytest入門</a>
       </section>
       <section class="archive-entry">
-        <a class="entry-title-link" href="{httpserver.url_for('/post3')}">モックとフィクスチャの使い方</a>
+        <a class="entry-title-link" href="https://nikkie-ftnext.hatenablog.com/entry/post3">モックとフィクスチャの使い方</a>
       </section>
     </div>
   </body>
 </html>"""
+    respx.get("https://nikkie-ftnext.hatenablog.com/archive/2025").mock(
+        return_value=httpx.Response(
+            status_code=200,
+            text=html_response,
+        )
     )
-    return httpserver
 
-
-@responses.activate
-def test_main_success_path(monkeypatch, blog_server, capsys):
     monkeypatch.setattr("openai.api_key", "sk-test-dummy-key-for-testing")
 
     monkeypatch.setattr(
-        "sys.argv", ["omae-douyo", blog_server.url_for("/archive/2025")]
+        "sys.argv",
+        ["omae-douyo", "https://nikkie-ftnext.hatenablog.com/archive/2025"],
     )
 
     expected_summary = """\
