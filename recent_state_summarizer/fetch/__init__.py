@@ -17,6 +17,9 @@ from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 from recent_state_summarizer.fetch.hatena_bookmark import (
     fetch_hatena_bookmark_rss,
 )
+from recent_state_summarizer.fetch.qiita_advent_calendar import (
+    fetch_qiita_advent_calendar,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +30,7 @@ class URLType(Enum):
     HATENA_BLOG = "hatena_blog"
     HATENA_BOOKMARK_RSS = "hatena_bookmark_rss"
     ADVENTAR = "adventar"
+    QIITA_ADVENT_CALENDAR = "qiita_advent_calendar"
     UNKNOWN = "unknown"
 
 
@@ -46,6 +50,9 @@ def _detect_url_type(url: str) -> URLType:
         and parsed.path.endswith(".rss")
     ):
         return URLType.HATENA_BOOKMARK_RSS
+
+    if parsed.netloc == "qiita.com" and "/advent-calendar/" in parsed.path:
+        return URLType.QIITA_ADVENT_CALENDAR
 
     if "/calendars/" in parsed.path or "adventar.org" in parsed.netloc:
         return URLType.ADVENTAR
@@ -68,6 +75,8 @@ def _select_fetcher(url_type):
             return _fetch_titles
         case URLType.ADVENTAR:
             return fetch_adventar_calendar
+        case URLType.QIITA_ADVENT_CALENDAR:
+            return fetch_qiita_advent_calendar
         case _:
             raise ValueError(f"Unsupported URL type: {url_type}")
 
@@ -111,6 +120,7 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
         - はてなブログ（Hatena blog）
         - はてなブックマークRSS
         - Adventar
+        - Qiita Advent Calendar
 
     Example:
         python -m recent_state_summarizer.fetch \\
