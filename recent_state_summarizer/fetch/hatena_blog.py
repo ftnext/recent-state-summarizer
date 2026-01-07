@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from typing import TypedDict
-from urllib.request import urlopen
 
+import httpx
 from bs4 import BeautifulSoup
 
 PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
@@ -13,8 +13,10 @@ class TitleTag(TypedDict):
 
 
 def _fetch(url: str) -> str:
-    with urlopen(url) as res:
-        return res.read()
+    with httpx.Client() as client:
+        response = client.get(url)
+        response.raise_for_status()
+        return response.text
 
 
 def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
