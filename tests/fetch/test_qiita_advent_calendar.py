@@ -9,42 +9,40 @@ def test_fetch_qiita_advent_calendar_as_bullet_list(tmp_path):
     html_response = """\
 <!DOCTYPE html>
 <html>
-<head>
-<script id="js-react-on-rails-context" type="application/json">
+<body>
+<script type="application/json" data-js-react-on-rails-store="AppStoreWithReactOnRails">
 {
-  "advencalApp": {
-    "calendar": {
+  "adventCalendars": {
+    "tableAdventCalendars": [{
       "items": [
         {
-          "date": 1,
-          "article": {
-            "title": "Python型ヒントの基礎",
-            "url": "https://qiita.com/user1/items/abc123"
-          }
+          "comment": "Python型ヒントの基礎",
+          "day": 1,
+          "url": "https://qiita.com/user1/items/abc123",
+          "isRevealed": true,
+          "article": null
         },
         {
-          "date": 2,
-          "article": {
-            "title": "Genericsを使いこなす",
-            "url": "https://qiita.com/user2/items/def456"
-          }
+          "comment": "Genericsを使いこなす",
+          "day": 2,
+          "url": "https://qiita.com/user2/items/def456",
+          "isRevealed": true,
+          "article": null
         },
         {
-          "date": 3,
-          "comment": "記事なし"
+          "comment": "記事なし",
+          "day": 3,
+          "url": "",
+          "isRevealed": false
         }
       ]
-    }
+    }]
   }
 }
 </script>
-</head>
-<body>
 </body>
 </html>"""
-    respx.get(
-        "https://qiita.com/advent-calendar/2025/python-type-hints"
-    ).mock(
+    respx.get("https://qiita.com/advent-calendar/2025/python-type-hints").mock(
         return_value=httpx.Response(
             status_code=200,
             text=html_response,
@@ -68,42 +66,40 @@ def test_fetch_qiita_advent_calendar_as_json(tmp_path):
     html_response = """\
 <!DOCTYPE html>
 <html>
-<head>
-<script id="js-react-on-rails-context" type="application/json">
+<body>
+<script type="application/json" data-js-react-on-rails-store="AppStoreWithReactOnRails">
 {
-  "advencalApp": {
-    "calendar": {
+  "adventCalendars": {
+    "tableAdventCalendars": [{
       "items": [
         {
-          "date": 1,
-          "article": {
-            "title": "Python型ヒントの基礎",
-            "url": "https://qiita.com/user1/items/abc123"
-          }
+          "comment": "Python型ヒントの基礎",
+          "day": 1,
+          "url": "https://qiita.com/user1/items/abc123",
+          "isRevealed": true,
+          "article": null
         },
         {
-          "date": 2,
-          "article": {
-            "title": "Genericsを使いこなす",
-            "url": "https://qiita.com/user2/items/def456"
-          }
+          "comment": "Genericsを使いこなす",
+          "day": 2,
+          "url": "https://qiita.com/user2/items/def456",
+          "isRevealed": true,
+          "article": null
         },
         {
-          "date": 3,
-          "comment": "記事なし"
+          "comment": "記事なし",
+          "day": 3,
+          "url": "",
+          "isRevealed": false
         }
       ]
-    }
+    }]
   }
 }
 </script>
-</head>
-<body>
 </body>
 </html>"""
-    respx.get(
-        "https://qiita.com/advent-calendar/2025/python-type-hints"
-    ).mock(
+    respx.get("https://qiita.com/advent-calendar/2025/python-type-hints").mock(
         return_value=httpx.Response(
             status_code=200,
             text=html_response,

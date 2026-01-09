@@ -33,21 +33,26 @@ def fetch_qiita_advent_calendar(url: str) -> Generator[TitleTag, None, None]:
 def _parse_titles(raw_html: str) -> Generator[TitleTag, None, None]:
     """Parse titles from Qiita Advent Calendar HTML by extracting JSON data."""
     soup = BeautifulSoup(raw_html, "html.parser")
-    script_tag = soup.find("script", id="js-react-on-rails-context")
+    script_tag = soup.find(
+        "script",
+        attrs={"data-js-react-on-rails-store": "AppStoreWithReactOnRails"},
+    )
     if not script_tag or not script_tag.string:
         return
 
     data = json.loads(script_tag.string)
-    calendar_data = data.get("advencalApp", {})
-    items = calendar_data.get("calendar", {}).get("items", [])
+    advent_calendars = data.get("adventCalendars", {})
+    table_calendars = advent_calendars.get("tableAdventCalendars", [])
+    if not table_calendars:
+        return
+    items = table_calendars[0].get("items", [])
 
     for item in items:
-        article = item.get("article")
-        if not article:
+        if not item.get("isRevealed", False):
             continue
 
-        title = article.get("title")
-        article_url = article.get("url")
+        title = item.get("comment")
+        article_url = item.get("url")
 
         if title and article_url:
             yield {"title": title, "url": article_url}
