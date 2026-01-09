@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Hatena Blog (はてなブログ)
 - Hatena Bookmark RSS
 - Adventar calendars
+- Qiita Advent Calendar
 
 The main CLI command is `omae-douyo` which fetches titles and generates a summary in Japanese.
 
@@ -79,7 +80,7 @@ The fetcher system uses a strategy pattern based on URL detection:
 
 1. **URL Detection** (`fetch/__init__.py:_detect_url_type()`):
    - Analyzes URL to determine source type
-   - Returns `URLType` enum (HATENA_BLOG, HATENA_BOOKMARK_RSS, ADVENTAR, UNKNOWN)
+   - Returns `URLType` enum (HATENA_BLOG, HATENA_BOOKMARK_RSS, ADVENTAR, QIITA_ADVENT_CALENDAR, UNKNOWN)
 
 2. **Fetcher Selection** (`fetch/__init__.py:_select_fetcher()`):
    - Maps `URLType` to appropriate fetcher function
@@ -89,6 +90,7 @@ The fetcher system uses a strategy pattern based on URL detection:
    - `hatena_blog.py`: Parses HTML with BeautifulSoup, recursively follows pagination
    - `hatena_bookmark.py`: Parses RSS feeds with feedparser
    - `adventar.py`: Uses httpx + BeautifulSoup to parse Adventar calendar pages
+   - `qiita_advent_calendar.py`: Uses httpx + BeautifulSoup to extract JSON data from Qiita Advent Calendar pages
 
 All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
 
@@ -128,9 +130,9 @@ Test structure mirrors source code:
 
 ## Key Dependencies
 
-- `beautifulsoup4`: HTML parsing for Hatena Blog and Adventar
+- `beautifulsoup4`: HTML parsing for Hatena Blog, Adventar, and Qiita Advent Calendar
 - `feedparser`: RSS parsing for Hatena Bookmark
-- `httpx`: HTTP client for Adventar (supports async, though not currently used)
+- `httpx`: HTTP client for Adventar and Qiita Advent Calendar (supports async, though not currently used)
 - `openai<1`: Legacy OpenAI API (pre-v1.0)
 - `urllib.request.urlopen`: Used by Hatena Blog fetcher only
 

@@ -24,6 +24,7 @@ def parse_args():
         - はてなブログ（Hatena blog）
         - はてなブックマークRSS
         - Adventar
+        - Qiita Advent Calendar
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
