@@ -30,6 +30,7 @@ Currently support:
 - はてなブログ（Hatena blog）
 - はてなブックマークRSS
 - Adventar
+- Qiita Advent Calendar
 
 To see help, type `omae-douyo -h`.
 
