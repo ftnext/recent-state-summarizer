@@ -130,3 +130,10 @@ class TestHelpMessage:
             main()
         captured = capsys.readouterr()
         assert "usage: omae-douyo [-h] {run,fetch} ..." in captured.out
+
+    def test_command_only(self, monkeypatch, capsys):
+        monkeypatch.setattr("sys.argv", ["omae-douyo"])
+        with pytest.raises(SystemExit):
+            main()
+        captured = capsys.readouterr()
+        assert "usage: omae-douyo [-h] {run,fetch} ..." in captured.out

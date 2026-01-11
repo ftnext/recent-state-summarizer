@@ -60,7 +60,9 @@ def fetch_cli(args):
 def main():
     known_subcommands = {"run", "fetch"}
     help_flags = {"-h", "--help"}
-    if sys.argv[1] in help_flags:
+    if len(sys.argv) == 1:
+        sys.argv.append("--help")
+    elif sys.argv[1] in help_flags:
         pass
     elif sys.argv[1] not in known_subcommands:
         sys.argv.insert(1, "run")
