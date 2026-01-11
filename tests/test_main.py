@@ -2,6 +2,7 @@ import json
 from unittest.mock import patch
 
 import httpx
+import pytest
 import responses
 import respx
 
@@ -103,3 +104,15 @@ def test_fetch_subcommand(fetch_main, monkeypatch):
     fetch_main.assert_called_once_with(
         "https://example.com", "articles.jsonl", save_as_title_list=False
     )
+
+
+class TestHelpMessage:
+    def test_fetch_help(self, monkeypatch, capsys):
+        monkeypatch.setattr("sys.argv", ["omae-douyo", "fetch", "--help"])
+        with pytest.raises(SystemExit):
+            main()
+        captured = capsys.readouterr()
+        assert (
+            "usage: omae-douyo fetch [-h] [--as-title-list] url save_path"
+            in captured.out
+        )
