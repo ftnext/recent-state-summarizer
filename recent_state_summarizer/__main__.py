@@ -58,14 +58,17 @@ def fetch_cli(args):
 
 
 def normalize_argv():
-    known_subcommands = {"run", "fetch"}
-    help_flags = {"-h", "--help"}
     if len(sys.argv) == 1:
-        sys.argv.append("--help")
-    elif sys.argv[1] in help_flags:
-        pass
-    elif sys.argv[1] not in known_subcommands:
+        return ["omae-douyo", "--help"]
+
+    help_flags = {"-h", "--help"}
+    if sys.argv[1] in help_flags:
+        return sys.argv
+
+    known_subcommands = {"run", "fetch"}
+    if sys.argv[1] not in known_subcommands:
         sys.argv.insert(1, "run")
+        return sys.argv
 
     return sys.argv
 

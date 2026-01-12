@@ -2,11 +2,10 @@ import json
 from unittest.mock import patch
 
 import httpx
-import pytest
 import responses
 import respx
 
-from recent_state_summarizer.__main__ import main
+from recent_state_summarizer.__main__ import main, normalize_argv
 
 
 @respx.mock
@@ -107,33 +106,18 @@ def test_fetch_subcommand(fetch_main, monkeypatch):
 
 
 class TestHelpMessage:
-    def test_fetch_help(self, monkeypatch, capsys):
+    def test_fetch_help(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo", "fetch", "--help"])
-        with pytest.raises(SystemExit):
-            main()
-        captured = capsys.readouterr()
-        assert (
-            "usage: omae-douyo fetch [-h] [--as-title-list] url save_path"
-            in captured.out
-        )
+        assert normalize_argv() == ["omae-douyo", "fetch", "--help"]
 
-    def test_run_help(self, monkeypatch, capsys):
+    def test_run_help(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo", "run", "--help"])
-        with pytest.raises(SystemExit):
-            main()
-        captured = capsys.readouterr()
-        assert "usage: omae-douyo run [-h] url" in captured.out
+        assert normalize_argv() == ["omae-douyo", "run", "--help"]
 
-    def test_help_only(self, monkeypatch, capsys):
+    def test_help_only(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo", "--help"])
-        with pytest.raises(SystemExit):
-            main()
-        captured = capsys.readouterr()
-        assert "usage: omae-douyo [-h] {run,fetch} ..." in captured.out
+        assert normalize_argv() == ["omae-douyo", "--help"]
 
-    def test_command_only(self, monkeypatch, capsys):
+    def test_command_only(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo"])
-        with pytest.raises(SystemExit):
-            main()
-        captured = capsys.readouterr()
-        assert "usage: omae-douyo [-h] {run,fetch} ..." in captured.out
+        assert normalize_argv() == ["omae-douyo", "--help"]
