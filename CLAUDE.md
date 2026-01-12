@@ -72,7 +72,17 @@ The tool has two main paths:
    - Entry: `__main__.py:main()` → `fetch_cli()`
    - Saves as JSON Lines or bullet list format
 
-The CLI automatically inserts the "run" subcommand if no known subcommand is provided, allowing `omae-douyo <url>` to work as a shortcut.
+### Argument Normalization
+
+The CLI uses `normalize_argv()` (`__main__.py`) to provide a user-friendly command interface:
+
+- **Empty arguments**: Returns `["--help"]` to show help message
+- **Help flags first** (`-h`, `--help`): Passes through unchanged to show appropriate help
+- **Unknown subcommand**: Automatically inserts `"run"` subcommand at the beginning
+  - Example: `omae-douyo <url>` → `omae-douyo run <url>`
+- **Known subcommands**: Passes through unchanged (`run`, `fetch`)
+
+This allows users to omit the `run` subcommand for the most common use case while maintaining explicit subcommand support when needed.
 
 ### Fetcher System
 
