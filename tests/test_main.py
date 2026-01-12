@@ -108,16 +108,16 @@ def test_fetch_subcommand(fetch_main, monkeypatch):
 class TestHelpMessage:
     def test_fetch_help(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo", "fetch", "--help"])
-        assert normalize_argv() == ["omae-douyo", "fetch", "--help"]
+        assert normalize_argv() == ["fetch", "--help"]
 
     def test_run_help(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo", "run", "--help"])
-        assert normalize_argv() == ["omae-douyo", "run", "--help"]
+        assert normalize_argv() == ["run", "--help"]
 
     def test_help_only(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo", "--help"])
-        assert normalize_argv() == ["omae-douyo", "--help"]
+        assert normalize_argv() == ["--help"]
 
     def test_command_only(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo"])
-        assert normalize_argv() == ["omae-douyo", "--help"]
+        assert normalize_argv() == ["--help"]

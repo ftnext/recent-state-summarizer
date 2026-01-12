@@ -57,24 +57,24 @@ def fetch_cli(args):
     fetch_main(args.url, args.save_path, save_as_title_list=args.as_title_list)
 
 
-def normalize_argv():
-    if len(sys.argv) == 1:
-        return ["omae-douyo", "--help"]
+def normalize_argv() -> list[str]:
+    argv = sys.argv[1:]
+    if len(argv) == 0:
+        return ["--help"]
 
     help_flags = {"-h", "--help"}
-    if sys.argv[1] in help_flags:
-        return sys.argv
+    if argv[0] in help_flags:
+        return argv
 
     known_subcommands = {"run", "fetch"}
-    if sys.argv[1] not in known_subcommands:
-        sys.argv.insert(1, "run")
-        return sys.argv
+    if argv[0] not in known_subcommands:
+        return ["run"] + argv
 
-    return sys.argv
+    return argv
 
 
 def main():
     parser = build_parser()
     argv = normalize_argv()
-    args = parser.parse_args(argv[1:])
+    args = parser.parse_args(argv)
     args.func(args)
