@@ -8,7 +8,7 @@ from recent_state_summarizer.fetch import build_parser as build_fetch_parser
 from recent_state_summarizer.summarize import summarize_titles
 
 
-def parse_args():
+def build_parser():
     help_message = """
     Summarize blog article titles with the OpenAI API.
 
@@ -41,7 +41,7 @@ def parse_args():
     )
     fetch_parser.set_defaults(func=fetch_cli)
 
-    return parser.parse_args()
+    return parser
 
 
 def run_cli(args):
@@ -57,7 +57,7 @@ def fetch_cli(args):
     fetch_main(args.url, args.save_path, save_as_title_list=args.as_title_list)
 
 
-def main():
+def normalize_argv():
     known_subcommands = {"run", "fetch"}
     help_flags = {"-h", "--help"}
     if len(sys.argv) == 1:
@@ -67,5 +67,11 @@ def main():
     elif sys.argv[1] not in known_subcommands:
         sys.argv.insert(1, "run")
 
-    args = parse_args()
+    return sys.argv
+
+
+def main():
+    parser = build_parser()
+    argv = normalize_argv()
+    args = parser.parse_args(argv[1:])
     args.func(args)
