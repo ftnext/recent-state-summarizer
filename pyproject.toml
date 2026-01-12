@@ -43,3 +43,6 @@ exclude = ["tests"]
 
 [tool.setuptools.dynamic]
 version = {attr = "recent_state_summarizer.__version__"}
+
+[tool.pytest]
+testpaths = ["tests"]

@@ -5,7 +5,7 @@ import httpx
 import responses
 import respx
 
-from recent_state_summarizer.__main__ import main
+from recent_state_summarizer.__main__ import main, normalize_argv
 
 
 @respx.mock
@@ -103,3 +103,61 @@ def test_fetch_subcommand(fetch_main, monkeypatch):
     fetch_main.assert_called_once_with(
         "https://example.com", "articles.jsonl", save_as_title_list=False
     )
+
+
+class TestNormalizeArgv:
+    def test_fetch(self, monkeypatch):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "omae-douyo",
+                "fetch",
+                "https://awesome.hatenablog.com/archive/2023/4",
+                "articles.jsonl",
+            ],
+        )
+        assert normalize_argv() == [
+            "fetch",
+            "https://awesome.hatenablog.com/archive/2023/4",
+            "articles.jsonl",
+        ]
+
+    def test_fetch_help(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["omae-douyo", "fetch", "--help"])
+        assert normalize_argv() == ["fetch", "--help"]
+
+    def test_run(self, monkeypatch):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "omae-douyo",
+                "run",
+                "https://awesome.hatenablog.com/archive/2023/4",
+            ],
+        )
+        assert normalize_argv() == [
+            "run",
+            "https://awesome.hatenablog.com/archive/2023/4",
+        ]
+
+    def test_run_help(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["omae-douyo", "run", "--help"])
+        assert normalize_argv() == ["run", "--help"]
+
+    def test_url(self, monkeypatch):
+        monkeypatch.setattr(
+            "sys.argv",
+            ["omae-douyo", "https://awesome.hatenablog.com/archive/2023/4"],
+        )
+        assert normalize_argv() == [
+            "run",
+            "https://awesome.hatenablog.com/archive/2023/4",
+        ]
+
+    def test_help_only(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["omae-douyo", "--help"])
+        assert normalize_argv() == ["--help"]
+
+    def test_command_only(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["omae-douyo"])
+        assert normalize_argv() == ["--help"]
