@@ -19,12 +19,6 @@ def build_parser():
 
     Retrieve the titles of articles from a specified URL.
     After summarization, prints the summary.
-
-    Support:
-        - はてなブログ（Hatena blog）
-        - はてなブックマークRSS
-        - Adventar
-        - Qiita Advent Calendar
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -32,12 +26,31 @@ def build_parser():
     )
     subparsers = parser.add_subparsers(dest="subcommand")
 
-    run_parser = subparsers.add_parser("run", help=argparse.SUPPRESS)
+    run_parser = subparsers.add_parser(
+        "run", help="Fetch article titles and generate summary (default)"
+    )
     run_parser.add_argument("url", help="URL of archive page")
     run_parser.set_defaults(func=run_cli)
 
+    fetch_help_message = """
+    Retrieve the titles and URLs of articles from a web page specified by URL
+    and save them as JSON Lines format.
+
+    Support:
+        - はてなブログ（Hatena blog）
+        - はてなブックマークRSS
+        - Adventar
+        - Qiita Advent Calendar
+
+    Example:
+        omae-douyo fetch https://awesome.hatenablog.com/archive/2023 articles.jsonl
+    """
     fetch_parser = subparsers.add_parser(
-        "fetch", parents=[build_fetch_parser(add_help=False)]
+        "fetch",
+        parents=[build_fetch_parser(add_help=False)],
+        help="Fetch article titles only and save to file",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=dedent(fetch_help_message),
     )
     fetch_parser.set_defaults(func=fetch_cli)
 
