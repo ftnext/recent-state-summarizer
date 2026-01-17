@@ -7,14 +7,11 @@ import textwrap
 from collections.abc import Iterable
 from pathlib import Path
 
-from recent_state_summarizer.fetch.registry import get_fetcher, get_registered_names
-
-# Import fetchers to trigger registration (order matters: specific matchers first)
-# Re-export for backward compatibility
-from recent_state_summarizer.fetch.hatena_bookmark import fetch_hatena_bookmark_rss
-from recent_state_summarizer.fetch.qiita_advent_calendar import fetch_qiita_advent_calendar
-from recent_state_summarizer.fetch.adventar import TitleTag, fetch_adventar_calendar
-from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
+from recent_state_summarizer.fetch.adventar import TitleTag
+from recent_state_summarizer.fetch.registry import (
+    get_fetcher,
+    get_registered_names,
+)
 
 logger = logging.getLogger(__name__)
 

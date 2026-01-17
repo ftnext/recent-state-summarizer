@@ -1,7 +1,7 @@
 import httpx
 import respx
 
-from recent_state_summarizer.fetch import fetch_hatena_bookmark_rss
+from recent_state_summarizer.fetch.hatena_bookmark import fetch_hatena_bookmark_rss
 
 
 class TestHatenaBookmarkRSS:

@@ -3,11 +3,15 @@ from unittest.mock import patch
 import pytest
 
 from recent_state_summarizer.fetch import cli
-from recent_state_summarizer.fetch.registry import get_fetcher
-from recent_state_summarizer.fetch.hatena_bookmark import fetch_hatena_bookmark_rss
-from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
-from recent_state_summarizer.fetch.qiita_advent_calendar import fetch_qiita_advent_calendar
+from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
+from recent_state_summarizer.fetch.hatena_bookmark import (
+    fetch_hatena_bookmark_rss,
+)
+from recent_state_summarizer.fetch.qiita_advent_calendar import (
+    fetch_qiita_advent_calendar,
+)
+from recent_state_summarizer.fetch.registry import get_fetcher
 
 
 @patch("recent_state_summarizer.fetch._main")
