@@ -13,7 +13,7 @@ PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
 def _match_hatena_blog(url: str) -> bool:
     parsed = urlparse(url)
     netloc = parsed.netloc
-    return "hatenablog.com" in netloc or "hateblo.jp" in netloc
+    return netloc.endswith(".hatenablog.com") or netloc.endswith(".hateblo.jp")
 
 
 class TitleTag(TypedDict):

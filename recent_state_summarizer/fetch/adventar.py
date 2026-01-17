@@ -10,7 +10,9 @@ from recent_state_summarizer.fetch.registry import register_fetcher
 
 def _match_adventar(url: str) -> bool:
     parsed = urlparse(url)
-    return "adventar.org" in parsed.netloc and "/calendars/" in parsed.path
+    netloc = parsed.netloc
+    is_adventar = netloc == "adventar.org" or netloc.endswith(".adventar.org")
+    return is_adventar and "/calendars/" in parsed.path
 
 
 class TitleTag(TypedDict):
