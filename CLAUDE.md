@@ -86,23 +86,46 @@ This allows users to omit the `run` subcommand for the most common use case whil
 
 ### Fetcher System
 
-The fetcher system uses a strategy pattern based on URL detection:
+The fetcher system uses a registry pattern where each fetcher self-registers:
 
-1. **URL Detection** (`fetch/__init__.py:_detect_url_type()`):
-   - Analyzes URL to determine source type
-   - Returns `URLType` enum (HATENA_BLOG, HATENA_BOOKMARK_RSS, ADVENTAR, QIITA_ADVENT_CALENDAR, UNKNOWN)
+1. **Registry** (`fetch/registry.py`):
+   - `@register_fetcher(name, matcher)`: Decorator for self-registration
+   - `get_fetcher(url)`: Returns appropriate fetcher by testing URL against matchers
+   - `get_registered_names()`: Returns list of fetcher names for help messages
 
-2. **Fetcher Selection** (`fetch/__init__.py:_select_fetcher()`):
-   - Maps `URLType` to appropriate fetcher function
-   - Uses Python 3.10+ match/case statement
-
-3. **Fetcher Implementations**:
+2. **Fetcher Implementations** (each self-registers via decorator):
    - `hatena_blog.py`: Parses HTML with BeautifulSoup, recursively follows pagination
    - `hatena_bookmark.py`: Parses RSS feeds with feedparser
    - `adventar.py`: Uses httpx + BeautifulSoup to parse Adventar calendar pages
    - `qiita_advent_calendar.py`: Uses httpx + BeautifulSoup to extract JSON data from Qiita Advent Calendar pages
 
 All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
+
+### Adding a New Fetcher
+
+To add support for a new source with minimal merge conflicts:
+
+1. Create a new file `fetch/new_source.py`:
+```python
+from urllib.parse import urlparse
+from recent_state_summarizer.fetch.registry import register_fetcher
+
+def _match_new_source(url: str) -> bool:
+    # Use exact domain matching to avoid false positives
+    netloc = urlparse(url).netloc
+    return netloc == "new-source.com" or netloc.endswith(".new-source.com")
+
+@register_fetcher(name="New Source", matcher=_match_new_source)
+def fetch_new_source(url: str) -> Generator[TitleTag, None, None]:
+    ...
+```
+
+2. Add one import line to `fetch/__init__.py`:
+```python
+from recent_state_summarizer.fetch.new_source import fetch_new_source
+```
+
+Registration order in `__init__.py` determines matcher priority (specific matchers should be imported before generic ones).
 
 ### Summarization
 
@@ -136,7 +159,7 @@ Tests use:
 Test structure mirrors source code:
 - `tests/test_main.py`: End-to-end CLI tests
 - `tests/fetch/test_*.py`: Individual fetcher tests
-- `tests/fetch/test_core.py`: URL detection and fetcher selection tests
+- `tests/fetch/test_core.py`: Registry-based fetcher lookup tests
 
 ## Key Dependencies
 

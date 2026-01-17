@@ -1,8 +1,18 @@
 from collections.abc import Generator
 from typing import TypedDict
+from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
+
+from recent_state_summarizer.fetch.registry import register_fetcher
+
+
+def _match_adventar(url: str) -> bool:
+    parsed = urlparse(url)
+    netloc = parsed.netloc
+    is_adventar = netloc == "adventar.org" or netloc.endswith(".adventar.org")
+    return is_adventar and "/calendars/" in parsed.path
 
 
 class TitleTag(TypedDict):
@@ -16,6 +26,10 @@ def _fetch(url: str) -> str:
     return response.text
 
 
+@register_fetcher(
+    name="Adventar",
+    matcher=_match_adventar,
+)
 def fetch_adventar_calendar(url: str) -> Generator[TitleTag, None, None]:
     """Fetch article titles and URLs from Adventar calendar.
 

@@ -6,7 +6,7 @@ from recent_state_summarizer.fetch import _main
 
 @respx.mock
 def test_fetch_as_bullet_list(tmp_path):
-    base_url = "https://example.com"
+    base_url = "https://example.hatenablog.com"
 
     respx.get(f"{base_url}/archive/2025/06").mock(
         return_value=Response(
@@ -58,7 +58,7 @@ def test_fetch_as_bullet_list(tmp_path):
 
 @respx.mock
 def test_fetch_as_json(tmp_path):
-    base_url = "https://example.com"
+    base_url = "https://example.hatenablog.com"
 
     respx.get(f"{base_url}/archive/2025/06").mock(
         return_value=Response(
@@ -110,7 +110,7 @@ def test_fetch_as_json(tmp_path):
 
 @respx.mock
 def test_fetch_multiple_archive_page(tmp_path):
-    base_url = "https://example.com"
+    base_url = "https://example.hatenablog.com"
 
     respx.get(f"{base_url}/archive/2025/07", params="page=2").mock(
         return_value=Response(

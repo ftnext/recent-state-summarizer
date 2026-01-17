@@ -1,6 +1,13 @@
 from unittest.mock import patch
 
-from recent_state_summarizer.fetch import URLType, _detect_url_type, cli
+import pytest
+
+from recent_state_summarizer.fetch import cli
+from recent_state_summarizer.fetch.registry import get_fetcher
+from recent_state_summarizer.fetch.hatena_bookmark import fetch_hatena_bookmark_rss
+from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
+from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
+from recent_state_summarizer.fetch.qiita_advent_calendar import fetch_qiita_advent_calendar
 
 
 @patch("recent_state_summarizer.fetch._main")
@@ -39,19 +46,28 @@ class TestCli:
         )
 
 
-class TestDetectUrlType:
+class TestGetFetcher:
     def test_hatena_bookmark_rss(self):
         url = "https://b.hatena.ne.jp/entrylist/it.rss"
-        assert _detect_url_type(url) == URLType.HATENA_BOOKMARK_RSS
+        assert get_fetcher(url) == fetch_hatena_bookmark_rss
 
     def test_hatena_blog_hatenablog_com(self):
         url = "https://example.hatenablog.com/archive/2023"
-        assert _detect_url_type(url) == URLType.HATENA_BLOG
+        assert get_fetcher(url) == _fetch_titles
 
     def test_hatena_blog_hateblo_jp(self):
         url = "https://example.hateblo.jp/archive/2023"
-        assert _detect_url_type(url) == URLType.HATENA_BLOG
+        assert get_fetcher(url) == _fetch_titles
 
-    def test_unknown_url(self):
+    def test_adventar(self):
+        url = "https://adventar.org/calendars/12345"
+        assert get_fetcher(url) == fetch_adventar_calendar
+
+    def test_qiita_advent_calendar(self):
+        url = "https://qiita.com/advent-calendar/2025/python"
+        assert get_fetcher(url) == fetch_qiita_advent_calendar
+
+    def test_unknown_url_raises(self):
         url = "https://example.com/blog"
-        assert _detect_url_type(url) == URLType.UNKNOWN
+        with pytest.raises(ValueError, match="Unsupported URL"):
+            get_fetcher(url)
