@@ -190,3 +190,14 @@ git push origin main --tags
 
 - **Avoid comments**: Express code intent through descriptive function and variable names rather than comments. The code should be self-documenting.
 - **Minimize diffs**: Keep code changes minimal and focused. Avoid unnecessary refactoring or reformatting when making specific changes.
+
+### GitHub CLI
+
+When using `gh` commands, always specify the `-R` flag to explicitly set the repository:
+
+```bash
+gh pr create -R owner/repo ...
+gh issue list -R owner/repo ...
+```
+
+This is required in environments where the git remote URL uses a local proxy (such as Claude Code on the Web), as `gh` cannot automatically detect the repository from the git remote.
