@@ -4,7 +4,7 @@ from collections.abc import Callable, Generator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from recent_state_summarizer.fetch.adventar import TitleTag
+    from recent_state_summarizer.fetch.types import TitleTag
 
 Fetcher = Callable[[str], Generator["TitleTag", None, None]]
 URLMatcher = Callable[[str], bool]

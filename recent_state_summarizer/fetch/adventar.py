@@ -1,11 +1,11 @@
 from collections.abc import Generator
-from typing import TypedDict
 from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
 
 from recent_state_summarizer.fetch.registry import register_fetcher
+from recent_state_summarizer.fetch.types import TitleTag
 
 
 def _match_adventar(url: str) -> bool:
@@ -13,11 +13,6 @@ def _match_adventar(url: str) -> bool:
     netloc = parsed.netloc
     is_adventar = netloc == "adventar.org" or netloc.endswith(".adventar.org")
     return is_adventar and "/calendars/" in parsed.path
-
-
-class TitleTag(TypedDict):
-    title: str
-    url: str
 
 
 def _fetch(url: str) -> str:

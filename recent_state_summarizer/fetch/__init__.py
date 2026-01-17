@@ -7,11 +7,11 @@ import textwrap
 from collections.abc import Iterable
 from pathlib import Path
 
-from recent_state_summarizer.fetch.adventar import TitleTag
 from recent_state_summarizer.fetch.registry import (
     get_fetcher,
     get_registered_names,
 )
+from recent_state_summarizer.fetch.types import TitleTag
 
 logger = logging.getLogger(__name__)
 

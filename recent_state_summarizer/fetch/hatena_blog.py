@@ -1,11 +1,11 @@
 from collections.abc import Generator
-from typing import TypedDict
 from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
 
 from recent_state_summarizer.fetch.registry import register_fetcher
+from recent_state_summarizer.fetch.types import TitleTag
 
 PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
 
@@ -14,11 +14,6 @@ def _match_hatena_blog(url: str) -> bool:
     parsed = urlparse(url)
     netloc = parsed.netloc
     return netloc.endswith(".hatenablog.com") or netloc.endswith(".hateblo.jp")
-
-
-class TitleTag(TypedDict):
-    title: str
-    url: str
 
 
 def _fetch(url: str) -> str:
