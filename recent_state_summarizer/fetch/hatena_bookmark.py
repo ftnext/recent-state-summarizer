@@ -1,7 +1,19 @@
 from typing import Generator, TypedDict
+from urllib.parse import urlparse
 
 import feedparser
 import httpx
+
+from recent_state_summarizer.fetch.registry import register_fetcher
+
+
+def _match_hatena_bookmark_rss(url: str) -> bool:
+    parsed = urlparse(url)
+    return (
+        parsed.netloc == "b.hatena.ne.jp"
+        and parsed.path.startswith("/entrylist/")
+        and parsed.path.endswith(".rss")
+    )
 
 
 class BookmarkEntry(TypedDict):
@@ -10,6 +22,10 @@ class BookmarkEntry(TypedDict):
     description: str
 
 
+@register_fetcher(
+    name="はてなブックマークRSS",
+    matcher=_match_hatena_bookmark_rss,
+)
 def fetch_hatena_bookmark_rss(
     url: str,
 ) -> Generator[BookmarkEntry, None, None]:

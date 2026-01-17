@@ -1,9 +1,17 @@
 import json
 from collections.abc import Generator
 from typing import TypedDict
+from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
+
+from recent_state_summarizer.fetch.registry import register_fetcher
+
+
+def _match_qiita_advent_calendar(url: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.netloc == "qiita.com" and "/advent-calendar/" in parsed.path
 
 
 class TitleTag(TypedDict):
@@ -17,6 +25,10 @@ def _fetch(url: str) -> str:
     return response.text
 
 
+@register_fetcher(
+    name="Qiita Advent Calendar",
+    matcher=_match_qiita_advent_calendar,
+)
 def fetch_qiita_advent_calendar(url: str) -> Generator[TitleTag, None, None]:
     """Fetch article titles and URLs from Qiita Advent Calendar.
 

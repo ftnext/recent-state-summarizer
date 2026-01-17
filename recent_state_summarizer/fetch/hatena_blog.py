@@ -1,10 +1,22 @@
 from collections.abc import Generator
 from typing import TypedDict
+from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
 
+from recent_state_summarizer.fetch.registry import register_fetcher
+
 PARSE_HATENABLOG_KWARGS = {"name": "a", "attrs": {"class": "entry-title-link"}}
+
+
+def _match_hatena_blog(url: str) -> bool:
+    parsed = urlparse(url)
+    return (
+        "hatenablog.com" in url
+        or "hateblo.jp" in url
+        or "/archive/" in parsed.path
+    )
 
 
 class TitleTag(TypedDict):
@@ -19,6 +31,10 @@ def _fetch(url: str) -> str:
         return response.text
 
 
+@register_fetcher(
+    name="はてなブログ（Hatena blog）",
+    matcher=_match_hatena_blog,
+)
 def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
     raw_html = _fetch(url)
     yield from _parse_titles(raw_html)
