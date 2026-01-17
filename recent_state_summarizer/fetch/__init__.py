@@ -10,12 +10,11 @@ from pathlib import Path
 from recent_state_summarizer.fetch.registry import get_fetcher, get_registered_names
 
 # Import fetchers to trigger registration (order matters: specific matchers first)
-import recent_state_summarizer.fetch.hatena_bookmark  # noqa: F401
-import recent_state_summarizer.fetch.qiita_advent_calendar  # noqa: F401
-import recent_state_summarizer.fetch.adventar  # noqa: F401
-import recent_state_summarizer.fetch.hatena_blog  # noqa: F401
-
-from recent_state_summarizer.fetch.adventar import TitleTag
+# Re-export for backward compatibility
+from recent_state_summarizer.fetch.hatena_bookmark import fetch_hatena_bookmark_rss
+from recent_state_summarizer.fetch.qiita_advent_calendar import fetch_qiita_advent_calendar
+from recent_state_summarizer.fetch.adventar import TitleTag, fetch_adventar_calendar
+from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 
 logger = logging.getLogger(__name__)
 
