@@ -11,6 +11,7 @@ from recent_state_summarizer.fetch.hatena_bookmark import (
 from recent_state_summarizer.fetch.qiita_advent_calendar import (
     fetch_qiita_advent_calendar,
 )
+from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
 from recent_state_summarizer.fetch.registry import get_fetcher
 
 
@@ -70,6 +71,10 @@ class TestGetFetcher:
     def test_qiita_advent_calendar(self):
         url = "https://qiita.com/advent-calendar/2025/python"
         assert get_fetcher(url) == fetch_qiita_advent_calendar
+
+    def test_qiita_rss(self):
+        url = "https://qiita.com/ftnext/feed.atom"
+        assert get_fetcher(url) == fetch_qiita_rss
 
     def test_unknown_url_raises(self):
         url = "https://example.com/blog"
