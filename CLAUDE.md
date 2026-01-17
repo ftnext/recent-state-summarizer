@@ -107,10 +107,13 @@ To add support for a new source with minimal merge conflicts:
 
 1. Create a new file `fetch/new_source.py`:
 ```python
+from urllib.parse import urlparse
 from recent_state_summarizer.fetch.registry import register_fetcher
 
 def _match_new_source(url: str) -> bool:
-    return "new-source.com" in url
+    # Use exact domain matching to avoid false positives
+    netloc = urlparse(url).netloc
+    return netloc == "new-source.com" or netloc.endswith(".new-source.com")
 
 @register_fetcher(name="New Source", matcher=_match_new_source)
 def fetch_new_source(url: str) -> Generator[TitleTag, None, None]:
