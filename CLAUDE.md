@@ -58,6 +58,15 @@ python -m recent_state_summarizer.fetch -h
 python -m recent_state_summarizer.summarize -h
 ```
 
+### Code Formatting
+```bash
+# Format code with black
+uvx black -l 79 .
+
+# Sort imports with isort (using black-compatible profile)
+uvx isort --profile black -l 79 .
+```
+
 ## Architecture
 
 ### Command Flow
