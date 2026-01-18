@@ -220,6 +220,28 @@ git push origin main --tags
 
 ## Development Guidelines
 
+### Issue Workflow
+
+When working on an issue, follow this workflow:
+
+1. **Implement the feature/fix**: Make the necessary code changes
+2. **Format code**: Run black and isort to ensure code style consistency
+   ```bash
+   uvx black -l 79 .
+   uvx isort --profile black -l 79 .
+   ```
+3. **Run tests**: Ensure all tests pass before proceeding
+   ```bash
+   python -m pytest tests/ -v
+   ```
+4. **Update CLAUDE.md**: If the changes introduce new patterns, architecture decisions, or development practices, update this file accordingly
+5. **Create a Pull Request**: Use `gh` CLI to create a PR
+   ```bash
+   gh pr create -R owner/repo --title "..." --body "..."
+   ```
+
+**Important**: Do not create a PR until all tests pass. CLAUDE.md updates should be included in the same PR as the implementation.
+
 ### Code Style
 
 - **Avoid comments**: Express code intent through descriptive function and variable names rather than comments. The code should be self-documenting.
