@@ -29,7 +29,7 @@ pip install -e '.[testing]'
 ### Running Tests
 ```bash
 # Run all tests
-python -m pytest tests/ -v
+python -m pytest -v
 
 # Run a single test file
 python -m pytest tests/test_main.py -v
@@ -235,7 +235,7 @@ When working on an issue, follow this workflow:
    ```
 3. **Run tests**: Ensure all tests pass before proceeding
    ```bash
-   python -m pytest tests/ -v
+   python -m pytest -v
    ```
 4. **Update CLAUDE.md**: If the changes introduce new patterns, architecture decisions, or development practices, update this file accordingly
 5. **Create a Pull Request**: Use `gh` CLI to create a PR
