@@ -45,11 +45,11 @@ omae-douyo https://nikkie-ftnext.hatenablog.com/archive/2023/4
 omae-douyo https://qiita.com/ftnext/feed.atom
 
 # Fetch only (save as JSON Lines)
-omae-douyo fetch https://example.com/archive/2023 articles.jsonl
+omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 articles.jsonl
 omae-douyo fetch https://qiita.com/ftnext/feed.atom articles.jsonl
 
 # Fetch only (save as title list)
-omae-douyo fetch https://example.com/archive/2023 titles.txt --as-title-list
+omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 titles.txt --as-title-list
 ```
 
 ### Development Sub-commands
