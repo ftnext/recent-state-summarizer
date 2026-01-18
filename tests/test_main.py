@@ -2,10 +2,12 @@ import json
 from unittest.mock import patch
 
 import httpx
+import pytest
 import responses
 import respx
 
 from recent_state_summarizer.__main__ import main, normalize_argv
+from recent_state_summarizer.fetch.registry import get_registered_names
 
 
 @respx.mock
@@ -161,3 +163,18 @@ class TestNormalizeArgv:
     def test_command_only(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo"])
         assert normalize_argv() == ["--help"]
+
+
+@pytest.mark.parametrize("fetcher_name", get_registered_names())
+def test_fetch_help_includes_fetcher(capsys, monkeypatch, fetcher_name):
+    """Test that fetch --help shows all registered fetchers dynamically."""
+    monkeypatch.setattr("sys.argv", ["omae-douyo", "fetch", "--help"])
+
+    # argparse exits with SystemExit when --help is used
+    with pytest.raises(SystemExit):
+        main()
+
+    captured = capsys.readouterr()
+    help_output = captured.out
+
+    assert fetcher_name in help_output, f"'{fetcher_name}' not found in help message"

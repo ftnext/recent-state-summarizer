@@ -32,25 +32,13 @@ def build_parser():
     run_parser.add_argument("url", help="URL of archive page")
     run_parser.set_defaults(func=run_cli)
 
-    fetch_help_message = """
-    Retrieve the titles and URLs of articles from a web page specified by URL
-    and save them as JSON Lines format.
-
-    Support:
-        - はてなブログ（Hatena blog）
-        - はてなブックマークRSS
-        - Adventar
-        - Qiita Advent Calendar
-
-    Example:
-        omae-douyo fetch https://awesome.hatenablog.com/archive/2023 articles.jsonl
-    """
+    fetch_parser_template = build_fetch_parser(add_help=False)
     fetch_parser = subparsers.add_parser(
         "fetch",
-        parents=[build_fetch_parser(add_help=False)],
+        parents=[fetch_parser_template],
         help="Fetch article titles only and save to file",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=dedent(fetch_help_message),
+        description=fetch_parser_template.description,
     )
     fetch_parser.set_defaults(func=fetch_cli)
 
