@@ -9,24 +9,36 @@ class TestQiitaRSS:
     def test_fetch_qiita_rss(self):
         atom_feed = """\
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>ftnext の記事</title>
-  <link rel="alternate" href="https://qiita.com/ftnext"/>
-  <id>https://qiita.com/ftnext/feed.atom</id>
-  <updated>2025-01-15T12:00:00Z</updated>
+<feed xml:lang="ja-JP" xmlns="http://www.w3.org/2005/Atom">
+  <id>tag:qiita.com,2005:/ftnext/feed</id>
+  <link rel="alternate" type="text/html" href="https://qiita.com"/>
+  <link rel="self" type="application/atom+xml" href="https://qiita.com/ftnext/feed.atom"/>
+  <title>ftnextの記事 - Qiita</title>
+  <description>Qiitaでユーザーftnextによる最近の記事</description>
+  <updated>2022-10-01T19:34:17+09:00</updated>
+  <link>https://qiita.com/ftnext</link>
   <entry>
-    <title>Sample Qiita Article 1</title>
-    <link rel="alternate" href="https://qiita.com/ftnext/items/abc123"/>
-    <id>https://qiita.com/ftnext/items/abc123</id>
-    <published>2025-01-15T12:00:00Z</published>
-    <updated>2025-01-15T12:00:00Z</updated>
-  </entry>
-  <entry>
-    <title>Sample Qiita Article 2</title>
-    <link rel="alternate" href="https://qiita.com/ftnext/items/def456"/>
-    <id>https://qiita.com/ftnext/items/def456</id>
+    <id>tag:qiita.com,2005:PublicArticle/1627276</id>
     <published>2025-01-14T10:00:00Z</published>
     <updated>2025-01-14T10:00:00Z</updated>
+    <link rel="alternate" type="text/html" href="https://qiita.com/ftnext/items/abc123"/>
+    <url>https://qiita.com/ftnext/items/abc123</url>
+    <title>Sample Qiita Article 1</title>
+    <content type="text">1行目
+2行目...</content>
+    <author>
+      <name>ftnext</name>
+    </author>
+  </entry>
+  <entry>
+    <id>tag:qiita.com,2005:PublicArticle/1567368</id>
+    <published>2022-10-01T19:34:17+09:00</published>
+    <updated>2022-10-08T17:23:09+09:00</updated>
+    <link rel="alternate" href="https://qiita.com/ftnext/items/def456"/>
+    <url>https://qiita.com/ftnext/items/def456</url>
+    <title>Sample Qiita Article 2</title>
+    <content type="text">こんにちは
+この記事は...</content>
   </entry>
 </feed>"""
         respx.get("https://qiita.com/ftnext/feed.atom").mock(
