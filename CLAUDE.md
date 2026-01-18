@@ -142,6 +142,25 @@ from recent_state_summarizer.fetch.new_source import fetch_new_source
 
 Registration order in `__init__.py` determines matcher priority (specific matchers should be imported before generic ones).
 
+### Dynamic Help Messages
+
+The fetcher registry enables dynamic help message generation. When creating subparsers in `__main__.py`, ensure help messages reflect all registered fetchers:
+
+**Important**: argparse's `parents` parameter inherits arguments but **not** `description`. To show the dynamic fetcher list in help:
+
+```python
+# __main__.py
+fetch_parser_template = build_fetch_parser(add_help=False)
+fetch_parser = subparsers.add_parser(
+    "fetch",
+    parents=[fetch_parser_template],
+    description=fetch_parser_template.description,  # Explicitly set description
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+)
+```
+
+The `build_fetch_parser()` in `fetch/__init__.py` uses `get_registered_names()` to dynamically generate the fetcher list, ensuring new fetchers automatically appear in help without manual updates.
+
 ### Summarization
 
 `summarize.py` uses the OpenAI API (legacy v0.28.x):
