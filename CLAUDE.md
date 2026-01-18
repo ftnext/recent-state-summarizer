@@ -16,8 +16,11 @@ The main CLI command is `omae-douyo` which fetches titles and generates a summar
 ## Development Commands
 
 ### Environment Setup
+
+**Note**: Claude Code users have this automatically handled by the SessionStart hook. Manual setup is only needed for human developers or when the hook fails.
+
 ```bash
-python -m venv venv
+python -m venv venv --upgrade-deps
 source venv/bin/activate
 pip install -r requirements.lock
 pip install -e '.[testing]'

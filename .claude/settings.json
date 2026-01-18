@@ -2,10 +2,11 @@
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "startup",
         "hooks": [
           {
             "type": "command",
-            "command": "bun x gh-setup-hooks",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/scripts/setup.sh",
             "timeout": 120
           }
         ]
