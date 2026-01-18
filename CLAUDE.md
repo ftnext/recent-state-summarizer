@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Hatena Bookmark RSS
 - Adventar calendars
 - Qiita Advent Calendar
+- Qiita RSS (user feeds)
 
 The main CLI command is `omae-douyo` which fetches titles and generates a summary in Japanese.
 
@@ -41,9 +42,11 @@ export OPENAI_API_KEY=your-key-here
 
 # Fetch and summarize
 omae-douyo https://nikkie-ftnext.hatenablog.com/archive/2023/4
+omae-douyo https://qiita.com/ftnext/feed.atom
 
 # Fetch only (save as JSON Lines)
 omae-douyo fetch https://example.com/archive/2023 articles.jsonl
+omae-douyo fetch https://qiita.com/ftnext/feed.atom articles.jsonl
 
 # Fetch only (save as title list)
 omae-douyo fetch https://example.com/archive/2023 titles.txt --as-title-list
@@ -107,6 +110,7 @@ The fetcher system uses a registry pattern where each fetcher self-registers:
    - `hatena_bookmark.py`: Parses RSS feeds with feedparser
    - `adventar.py`: Uses httpx + BeautifulSoup to parse Adventar calendar pages
    - `qiita_advent_calendar.py`: Uses httpx + BeautifulSoup to extract JSON data from Qiita Advent Calendar pages
+   - `qiita_rss.py`: Parses Atom feeds with feedparser (user RSS feeds)
 
 All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
 
@@ -133,6 +137,8 @@ def fetch_new_source(url: str) -> Generator[TitleTag, None, None]:
 ```python
 from recent_state_summarizer.fetch.new_source import fetch_new_source
 ```
+
+**Important**: The import is required to trigger the `@register_fetcher` decorator at module load time. Without this import, the fetcher will not be registered and `get_fetcher()` will raise "Unsupported URL" errors.
 
 Registration order in `__init__.py` determines matcher priority (specific matchers should be imported before generic ones).
 
