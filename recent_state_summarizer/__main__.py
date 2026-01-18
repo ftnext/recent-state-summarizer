@@ -32,11 +32,13 @@ def build_parser():
     run_parser.add_argument("url", help="URL of archive page")
     run_parser.set_defaults(func=run_cli)
 
+    fetch_parser_template = build_fetch_parser(add_help=False)
     fetch_parser = subparsers.add_parser(
         "fetch",
-        parents=[build_fetch_parser(add_help=False)],
+        parents=[fetch_parser_template],
         help="Fetch article titles only and save to file",
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=fetch_parser_template.description,
     )
     fetch_parser.set_defaults(func=fetch_cli)
 
