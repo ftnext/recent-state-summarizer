@@ -7,12 +7,8 @@ import textwrap
 from collections.abc import Iterable
 from pathlib import Path
 
-from recent_state_summarizer.fetch.registry import (
-    get_fetcher,
-    get_registered_names,
-)
-from recent_state_summarizer.fetch.types import TitleTag
-
+from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
+from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 from recent_state_summarizer.fetch.hatena_bookmark import (
     fetch_hatena_bookmark_rss,
 )
@@ -20,8 +16,11 @@ from recent_state_summarizer.fetch.qiita_advent_calendar import (
     fetch_qiita_advent_calendar,
 )
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
-from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
-from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
+from recent_state_summarizer.fetch.registry import (
+    get_fetcher,
+    get_registered_names,
+)
+from recent_state_summarizer.fetch.types import TitleTag
 
 logger = logging.getLogger(__name__)
 
