@@ -177,4 +177,6 @@ def test_fetch_help_includes_fetcher(capsys, monkeypatch, fetcher_name):
     captured = capsys.readouterr()
     help_output = captured.out
 
-    assert fetcher_name in help_output, f"'{fetcher_name}' not found in help message"
+    assert (
+        fetcher_name in help_output
+    ), f"'{fetcher_name}' not found in help message"

@@ -3,8 +3,10 @@ import sys
 import tempfile
 from textwrap import dedent
 
-from recent_state_summarizer.fetch import _main as fetch_main
-from recent_state_summarizer.fetch import build_parser as build_fetch_parser
+from recent_state_summarizer.fetch.cli import _main as fetch_main
+from recent_state_summarizer.fetch.cli import (
+    build_parser as build_fetch_parser,
+)
 from recent_state_summarizer.summarize import summarize_titles
 
 
