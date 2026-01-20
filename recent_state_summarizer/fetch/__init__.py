@@ -93,7 +93,3 @@ def cli():
     args = parser.parse_args()
 
     _main(args.url, args.save_path, save_as_title_list=args.as_title_list)
-
-
-if __name__ == "__main__":
-    cli()
