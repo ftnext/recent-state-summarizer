@@ -24,6 +24,11 @@ git push origin main --tags
 
 ## Instructions
 
+**Prerequisites:**
+- This must be executed on the `main` branch
+- All feature branches should be merged into `main` before running this command
+- Check current branch with `git branch --show-current` before proceeding
+
 If the user provided a version number (e.g., `/release 0.1.0`), use that. Otherwise, ask the user for the new version number.
 
 Execute the steps above, replacing X.Y.Z with the specified version.
