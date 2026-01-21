@@ -1,8 +1,8 @@
 ---
 name: release
 description: Bumps version and creates git tag for release
-invocations:
-  - release
+disable-model-invocation: true
+argument-hint: "[version-number]"
 ---
 
 # Version Management
