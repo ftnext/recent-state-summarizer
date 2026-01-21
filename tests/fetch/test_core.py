@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
-from recent_state_summarizer.fetch import cli
 from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
+from recent_state_summarizer.fetch.cli import cli
 from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 from recent_state_summarizer.fetch.hatena_bookmark import (
     fetch_hatena_bookmark_rss,
@@ -15,7 +15,7 @@ from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
 from recent_state_summarizer.fetch.registry import get_fetcher
 
 
-@patch("recent_state_summarizer.fetch._main")
+@patch("recent_state_summarizer.fetch.cli._main")
 class TestCli:
     def test_default_as_json(self, fetch_main, monkeypatch):
         monkeypatch.setattr(

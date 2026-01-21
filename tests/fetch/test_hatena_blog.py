@@ -1,7 +1,7 @@
 import respx
 from httpx import Response
 
-from recent_state_summarizer.fetch import _main
+from recent_state_summarizer.fetch.cli import _main
 
 
 @respx.mock
