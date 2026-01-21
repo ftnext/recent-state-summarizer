@@ -32,3 +32,8 @@ git push origin main --tags
 If the user provided a version number (e.g., `/release 0.1.0`), use that. Otherwise, ask the user for the new version number.
 
 Execute the steps above, replacing X.Y.Z with the specified version.
+
+After creating the commit and tag, use AskUserQuestion to ask whether to push to remote:
+- Question: "リモートにプッシュしますか？"
+- Option 1: "今すぐプッシュする" → Execute `git push origin main --tags`
+- Option 2: "後でやる" → Skip push and remind the user they can run `git push origin main --tags` manually later
