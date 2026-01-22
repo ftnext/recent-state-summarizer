@@ -117,6 +117,12 @@ The fetcher system uses a registry pattern where each fetcher self-registers:
 
 All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
 
+3. **CLI Interface** (`fetch/cli.py`):
+   - `_main(url, save_path, save_as_title_list)`: Core fetch logic that gets the appropriate fetcher, fetches titles, and saves to file
+   - `build_parser(add_help)`: Builds argparse parser with dynamic help message using `get_registered_names()`
+   - `cli()`: Entry point for `python -m recent_state_summarizer.fetch`
+   - Called by `__main__.py:fetch_cli()` when using `omae-douyo fetch` subcommand
+
 ### Adding a New Fetcher
 
 To add support for a new source with minimal merge conflicts:
@@ -143,7 +149,7 @@ from recent_state_summarizer.fetch.new_source import fetch_new_source
 
 **Important**: The import is required to trigger the `@register_fetcher` decorator at module load time. Without this import, the fetcher will not be registered and `get_fetcher()` will raise "Unsupported URL" errors.
 
-Registration order in `__init__.py` determines matcher priority (specific matchers should be imported before generic ones).
+**Note on `fetch/__init__.py` structure**: All fetchers must be imported in this file. Some imports may have a comment like `# Fetcher registration imports` but all imports serve the same purpose: triggering decorator registration. Registration order determines matcher priority (specific matchers should be imported before generic ones).
 
 ### Dynamic Help Messages
 
