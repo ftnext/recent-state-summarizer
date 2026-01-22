@@ -29,9 +29,13 @@ git push origin main --tags
 - All feature branches should be merged into `main` before running this command
 - Check current branch with `git branch --show-current` before proceeding
 
-If the user provided a version number (e.g., `/release 0.1.0`), use that. Otherwise, ask the user for the new version number.
+If the user provided a version number (e.g., `/release 0.1.0`), use that. Otherwise:
+1. Read the current version from `recent_state_summarizer/__init__.py`
+2. Parse the version number (format: MAJOR.MINOR.PATCH)
+3. Increment the PATCH number by 1
+4. Use the new version (e.g., `0.0.9` → `0.0.10`)
 
-Execute the steps above, replacing X.Y.Z with the specified version.
+Execute the steps above, replacing X.Y.Z with the specified or auto-incremented version.
 
 After creating the commit and tag, use AskUserQuestion to ask whether to push to remote:
 - Question: "リモートにプッシュしますか？"
