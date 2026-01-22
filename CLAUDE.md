@@ -236,7 +236,10 @@ When working on an issue, follow this workflow:
    ```bash
    python -m pytest -v
    ```
-4. **Update CLAUDE.md**: If the changes introduce new patterns, architecture decisions, or development practices, update this file accordingly
+4. **Update CLAUDE.md**: If the changes introduce new patterns, architecture decisions, or development practices, update this file using the `/init` skill
+   ```bash
+   /init
+   ```
 5. **Create a Pull Request**: Use `gh` CLI to create a PR
    ```bash
    gh pr create -R owner/repo --title "..." --body "..."
