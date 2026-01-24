@@ -10,4 +10,5 @@ from recent_state_summarizer.fetch.hatena_bookmark import (
 from recent_state_summarizer.fetch.qiita_advent_calendar import (
     fetch_qiita_advent_calendar,
 )
+from recent_state_summarizer.fetch.qiita_api import fetch_qiita_api
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
