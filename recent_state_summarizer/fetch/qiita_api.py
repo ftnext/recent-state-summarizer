@@ -12,7 +12,11 @@ def _match_qiita_api(url: str) -> bool:
     return parsed.netloc == "qiita.com" and "/api/v2/users/" in parsed.path
 
 
-@register_fetcher(name="Qiita API v2", matcher=_match_qiita_api)
+@register_fetcher(
+    name="Qiita API v2",
+    matcher=_match_qiita_api,
+    example="https://qiita.com/api/v2/users/user/items",
+)
 def fetch_qiita_api(url: str) -> Generator[TitleTag, None, None]:
     response = httpx.get(url, params={"per_page": 20})
     response.raise_for_status()

@@ -23,6 +23,7 @@ def _fetch(url: str) -> str:
 @register_fetcher(
     name="Qiita Advent Calendar",
     matcher=_match_qiita_advent_calendar,
+    example="https://qiita.com/advent-calendar/2023/python",
 )
 def fetch_qiita_advent_calendar(url: str) -> Generator[TitleTag, None, None]:
     """Fetch article titles and URLs from Qiita Advent Calendar.
