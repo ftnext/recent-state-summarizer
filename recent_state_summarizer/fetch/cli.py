@@ -9,6 +9,7 @@ from pathlib import Path
 
 from recent_state_summarizer.fetch.registry import (
     get_fetcher,
+    get_registered_help_entries,
     get_registered_names,
 )
 from recent_state_summarizer.fetch.types import TitleTag
@@ -46,16 +47,21 @@ def _save(path: str | Path, contents: str) -> None:
 
 
 def _build_support_list() -> str:
-    names = get_registered_names()
-    return "\n".join(f"        - {name}" for name in names)
+    entries = get_registered_help_entries()
+    lines = []
+    for name, example in entries:
+        lines.append(f"        - {name}")
+        if example:
+            lines.append(f"          {example}")
+    return "\n".join(lines)
 
 
 def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
     help_message = f"""
-    Retrieve the titles and URLs of articles from a web page specified by URL
+    Retrieve the titles and URLs of articles from a web page specified by <URL>
     and save them as JSON Lines format.
 
-    Support:
+    Supported URLs:
 {_build_support_list()}
 
     Example:
