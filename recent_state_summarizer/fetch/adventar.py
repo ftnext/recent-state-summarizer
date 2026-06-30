@@ -45,13 +45,13 @@ def _parse_titles(raw_html: str) -> Generator[TitleTag, None, None]:
     if not entry_list:
         return
 
-    items = entry_list.find_all("li", class_="item")
+    items = entry_list.find_all("li", class_="EntryList-item")
     for item in items:
-        article = item.find("div", class_="article")
+        article = item.find("div", class_="EntryList-article")
         if not article:
             continue
 
-        link_div = article.find("div", class_="link")
+        link_div = article.find("div", class_="EntryList-link")
         if not link_div:
             continue
 
