@@ -26,6 +26,7 @@ def _fetch(url: str) -> str:
 @register_fetcher(
     name="はてなブログ（Hatena blog）",
     matcher=_match_hatena_blog,
+    example="https://awesome.hatenablog.com/archive/2023",
 )
 def _fetch_titles(url: str) -> Generator[TitleTag, None, None]:
     raw_html = _fetch(url)

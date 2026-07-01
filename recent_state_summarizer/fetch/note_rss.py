@@ -13,7 +13,11 @@ def _match_note_rss(url: str) -> bool:
     return parsed.netloc == "note.com" and parsed.path.endswith("/rss")
 
 
-@register_fetcher(name="note RSS", matcher=_match_note_rss)
+@register_fetcher(
+    name="note RSS",
+    matcher=_match_note_rss,
+    example="https://note.com/user/rss",
+)
 def fetch_note_rss(url: str) -> Generator[TitleTag, None, None]:
     response = httpx.get(url)
     response.raise_for_status()
