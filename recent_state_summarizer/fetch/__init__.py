@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
+from recent_state_summarizer.fetch.github_changelog import (
+    fetch_github_changelog,
+)
 from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 
 # Fetcher registration imports (required for @register_fetcher decorator)
