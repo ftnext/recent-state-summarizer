@@ -4,6 +4,9 @@ import pytest
 
 from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
 from recent_state_summarizer.fetch.cli import cli
+from recent_state_summarizer.fetch.github_changelog import (
+    fetch_github_changelog,
+)
 from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
 from recent_state_summarizer.fetch.hatena_bookmark import (
     fetch_hatena_bookmark_rss,
@@ -80,6 +83,10 @@ class TestGetFetcher:
     def test_note_rss(self):
         url = "https://note.com/ftnext/rss"
         assert get_fetcher(url) == fetch_note_rss
+
+    def test_github_changelog(self):
+        url = "https://github.blog/changelog/feed/"
+        assert get_fetcher(url) == fetch_github_changelog
 
     def test_unknown_url_raises(self):
         url = "https://example.com/blog"
