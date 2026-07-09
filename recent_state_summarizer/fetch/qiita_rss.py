@@ -13,7 +13,11 @@ def _match_qiita_rss(url: str) -> bool:
     return parsed.netloc == "qiita.com" and parsed.path.endswith("/feed.atom")
 
 
-@register_fetcher(name="Qiita RSS", matcher=_match_qiita_rss)
+@register_fetcher(
+    name="Qiita RSS",
+    matcher=_match_qiita_rss,
+    example="https://qiita.com/user/feed.atom",
+)
 def fetch_qiita_rss(url: str) -> Generator[TitleTag, None, None]:
     response = httpx.get(url)
     response.raise_for_status()
