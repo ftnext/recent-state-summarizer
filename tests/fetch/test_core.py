@@ -15,6 +15,9 @@ from recent_state_summarizer.fetch.note_rss import fetch_note_rss
 from recent_state_summarizer.fetch.qiita_advent_calendar import (
     fetch_qiita_advent_calendar,
 )
+from recent_state_summarizer.fetch.qiita_official_event import (
+    fetch_qiita_official_event,
+)
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
 from recent_state_summarizer.fetch.registry import get_fetcher
 
@@ -79,6 +82,10 @@ class TestGetFetcher:
     def test_qiita_rss(self):
         url = "https://qiita.com/ftnext/feed.atom"
         assert get_fetcher(url) == fetch_qiita_rss
+
+    def test_qiita_official_event(self):
+        url = "https://qiita.com/official-events/bd14d28b53326d318fec"
+        assert get_fetcher(url) == fetch_qiita_official_event
 
     def test_note_rss(self):
         url = "https://note.com/ftnext/rss"

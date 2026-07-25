@@ -10,6 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Adventar calendars
 - Qiita Advent Calendar
 - Qiita RSS (user feeds)
+- Qiita Official Event (公式イベント)
 
 The main CLI command is `omae-douyo` which fetches titles and generates a summary in Japanese.
 
@@ -114,6 +115,7 @@ The fetcher system uses a registry pattern where each fetcher self-registers:
    - `adventar.py`: Uses httpx + BeautifulSoup to parse Adventar calendar pages
    - `qiita_advent_calendar.py`: Uses httpx + BeautifulSoup to extract JSON data from Qiita Advent Calendar pages
    - `qiita_rss.py`: Parses Atom feeds with feedparser (user RSS feeds)
+   - `qiita_official_event.py`: Uses httpx + BeautifulSoup to extract JSON data from Qiita official event pages, following `?page=N` pagination via `pageData.nextPage`
 
 All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
 

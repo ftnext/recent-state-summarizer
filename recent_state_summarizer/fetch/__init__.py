@@ -15,4 +15,7 @@ from recent_state_summarizer.fetch.qiita_advent_calendar import (
     fetch_qiita_advent_calendar,
 )
 from recent_state_summarizer.fetch.qiita_api import fetch_qiita_api
+from recent_state_summarizer.fetch.qiita_official_event import (
+    fetch_qiita_official_event,
+)
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
