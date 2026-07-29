@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Qiita RSS (user feeds)
 - Qiita Official Event (公式イベント)
 - Zenn RSS (user feeds)
+- Zenn Contest (experimental)
 
 The main CLI command is `omae-douyo` which fetches titles and generates a summary in Japanese.
 
@@ -118,6 +119,7 @@ The fetcher system uses a registry pattern where each fetcher self-registers:
    - `qiita_rss.py`: Parses Atom feeds with feedparser (user RSS feeds)
    - `qiita_official_event.py`: Uses httpx + BeautifulSoup to extract JSON data from Qiita official event pages, following `?page=N` pagination via `pageData.nextPage`
    - `zenn_rss.py`: Parses RSS feeds with feedparser (user feeds, `https://zenn.dev/{username}/feed?all=1`)
+   - `zenn_contest.py`: Uses httpx to call the undocumented `https://zenn.dev/api/articles?contest_slug={slug}` JSON API, following pagination via `next_page` (experimental: Zenn publishes neither a contest RSS feed nor this API's specification)
 
 All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
 

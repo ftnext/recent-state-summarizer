@@ -20,6 +20,7 @@ from recent_state_summarizer.fetch.qiita_official_event import (
 )
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
 from recent_state_summarizer.fetch.registry import get_fetcher
+from recent_state_summarizer.fetch.zenn_contest import fetch_zenn_contest
 from recent_state_summarizer.fetch.zenn_rss import fetch_zenn_rss
 
 
@@ -95,6 +96,12 @@ class TestGetFetcher:
     def test_zenn_rss(self):
         url = "https://zenn.dev/ftnext/feed?all=1"
         assert get_fetcher(url) == fetch_zenn_rss
+
+    def test_zenn_contest(self):
+        url = (
+            "https://zenn.dev/contests/splunk-opentelemetry-2026?tab=articles"
+        )
+        assert get_fetcher(url) == fetch_zenn_contest
 
     def test_github_changelog(self):
         url = "https://github.blog/changelog/feed/"
