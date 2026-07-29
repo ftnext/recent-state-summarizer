@@ -19,4 +19,5 @@ from recent_state_summarizer.fetch.qiita_official_event import (
     fetch_qiita_official_event,
 )
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
+from recent_state_summarizer.fetch.zenn_contest import fetch_zenn_contest
 from recent_state_summarizer.fetch.zenn_rss import fetch_zenn_rss
