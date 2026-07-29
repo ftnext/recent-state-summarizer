@@ -12,7 +12,11 @@ ZENN_ARTICLES_API_URL = f"{ZENN_ORIGIN}/api/articles"
 
 def _match_zenn_contest(url: str) -> bool:
     parsed = urlparse(url)
-    return parsed.netloc == "zenn.dev" and parsed.path.startswith("/contests/")
+    return (
+        parsed.netloc == "zenn.dev"
+        and parsed.path.startswith("/contests/")
+        and bool(_extract_contest_slug(url))
+    )
 
 
 @register_fetcher(

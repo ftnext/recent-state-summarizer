@@ -103,6 +103,11 @@ class TestGetFetcher:
         )
         assert get_fetcher(url) == fetch_zenn_contest
 
+    def test_zenn_contest_without_slug_raises(self):
+        url = "https://zenn.dev/contests/"
+        with pytest.raises(ValueError, match="Unsupported URL"):
+            get_fetcher(url)
+
     def test_github_changelog(self):
         url = "https://github.blog/changelog/feed/"
         assert get_fetcher(url) == fetch_github_changelog
