@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 import feedparser
@@ -6,6 +7,8 @@ import httpx
 
 from recent_state_summarizer.fetch.registry import register_fetcher
 from recent_state_summarizer.fetch.types import TitleTag
+
+RECENT_DAYS = 30
 
 
 def _match_github_changelog(url: str) -> bool:
@@ -16,12 +19,49 @@ def _match_github_changelog(url: str) -> bool:
     )
 
 
+def _recent_cutoff() -> datetime:
+    return datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
+
+
+def _published_at(entry) -> datetime:
+    return datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
+
+
 @register_fetcher(name="GitHub Changelog", matcher=_match_github_changelog)
 def fetch_github_changelog(url: str) -> Generator[TitleTag, None, None]:
-    response = httpx.get(url)
-    response.raise_for_status()
+    """Fetch changelog entries published within the recent days.
 
-    feed = feedparser.parse(response.content)
+    The feed returns 10 entries per page and ignores per-page size
+    parameters, so entries older than the cutoff are reached by walking
+    `?paged=N` until the cutoff, an empty page or a 404 response.
 
-    for entry in feed.entries:
-        yield {"title": entry.title, "url": entry.link}
+    Redirects are followed because `?paged=1` and the URL without a
+    trailing slash are answered with 301 to their canonical form.
+
+    Args:
+        url: GitHub Changelog feed URL (https://github.blog/changelog/feed/)
+
+    Yields:
+        TitleTag dictionaries containing title and url
+    """
+    cutoff = _recent_cutoff()
+
+    page = 1
+    while True:
+        response = httpx.get(
+            url, params={"paged": page}, follow_redirects=True
+        )
+        if response.status_code == httpx.codes.NOT_FOUND:
+            return
+        response.raise_for_status()
+
+        feed = feedparser.parse(response.content)
+        if not feed.entries:
+            return
+
+        for entry in feed.entries:
+            if _published_at(entry) < cutoff:
+                return
+            yield {"title": entry.title, "url": entry.link}
+
+        page += 1
