@@ -57,6 +57,10 @@ omae-douyo fetch https://qiita.com/ftnext/feed.atom articles.jsonl
 
 # Fetch only (save as title list)
 omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 titles.txt --as-title-list
+
+# Fetch the GitHub Changelog without specifying its feed URL
+omae-douyo fetch github-blog articles.jsonl
+omae-douyo fetch github-blog articles.jsonl --days 45
 ```
 
 ### Development Sub-commands
@@ -121,13 +125,15 @@ The fetcher system uses a registry pattern where each fetcher self-registers:
    - `qiita_official_event.py`: Uses httpx + BeautifulSoup to extract JSON data from Qiita official event pages, following `?page=N` pagination via `pageData.nextPage`
    - `zenn_rss.py`: Parses RSS feeds with feedparser (user feeds, `https://zenn.dev/{username}/feed?all=1`)
    - `zenn_contest.py`: Uses httpx to call the undocumented `https://zenn.dev/api/articles?contest_slug={slug}` JSON API, following pagination via `next_page` (experimental: Zenn publishes neither a contest RSS feed nor this API's specification)
-   - `github_changelog.py`: Parses RSS feeds with feedparser, walking `?paged=N` pagination until entries fall outside the `RECENT_DAYS` (30 day) window. The feed exposes no `rel="next"` link and ignores per-page size parameters, so the page number is incremented directly and the walk stops on the first entry older than the cutoff, an empty page, or a 404 (past the last page). Redirects are followed because `?paged=1` and the URL without a trailing slash are answered with 301 to their canonical form. Since the whole walk happens before anything is written, progress is reported with `logger.info()` once per page before each request (see `configure_logging()` below).
+   - `github_changelog.py`: Parses RSS feeds with feedparser, walking `?paged=N` pagination until entries fall outside the `days` window (`fetch_github_changelog(url, *, days=RECENT_DAYS)`, defaulting to the `RECENT_DAYS` 30 day window; the `github-blog` sub-command exposes it as `--days`). `FEED_URL` holds the canonical feed URL so the CLI can offer it as a default. The feed exposes no `rel="next"` link and ignores per-page size parameters, so the page number is incremented directly and the walk stops on the first entry older than the cutoff, an empty page, or a 404 (past the last page). Redirects are followed because `?paged=1` and the URL without a trailing slash are answered with 301 to their canonical form. Since the whole walk happens before anything is written, progress is reported with `logger.info()` once per page before each request (see `configure_logging()` below).
 
 All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
 
 3. **CLI Interface** (`fetch/cli.py`):
-   - `_main(url, save_path, save_as_title_list)`: Core fetch logic that gets the appropriate fetcher, fetches titles, and saves to file
-   - `build_parser(add_help)`: Builds argparse parser with dynamic help message using `get_registered_names()`
+   - `_main(url, save_path, save_as_title_list, days=None)`: Core fetch logic that gets the appropriate fetcher, fetches titles, and saves to file. `days` is forwarded to the fetcher as a keyword argument only when it is not `None`, so fetchers that take no period keep their single-argument signature
+   - `build_parser(add_help)`: Builds argparse parser with dynamic help message using `get_registered_names()`, for the `<url> <save_path>` form
+   - `build_github_blog_parser(add_help)`: Builds the parser for the `github-blog` sub-command (`<save_path>` plus `--days`, with `set_defaults(url=FEED_URL)` supplying the feed URL)
+   - `select_parser_builder(fetch_argv)`: Picks between the two builders by looking at the first argument after `fetch`. argparse cannot have a sub-parser and a preceding positional `url` in the same parser, so the parser is chosen from argv *before* parsing rather than expressed as nested sub-parsers. This keeps `omae-douyo fetch <url> <save_path>` unchanged and keeps `--days` out of its help
    - `configure_logging()`: Sets the `recent_state_summarizer` logger to INFO so fetcher progress reaches stderr, leaving the root logger at WARNING so third-party INFO logs (such as httpx request lines) stay silent. Called from both `cli()` and `__main__.py:main()`; stderr keeps progress out of the saved file and out of the summary printed to stdout by `omae-douyo run`.
    - `cli()`: Entry point for `python -m recent_state_summarizer.fetch`
    - Called by `__main__.py:fetch_cli()` when using `omae-douyo fetch` subcommand
@@ -168,6 +174,7 @@ The fetcher registry enables dynamic help message generation. When creating subp
 
 ```python
 # __main__.py
+build_fetch_parser = select_parser_builder(_fetch_argv(argv))
 fetch_parser_template = build_fetch_parser(add_help=False)
 fetch_parser = subparsers.add_parser(
     "fetch",
@@ -177,7 +184,9 @@ fetch_parser = subparsers.add_parser(
 )
 ```
 
-The `build_fetch_parser()` in `fetch/__init__.py` uses `get_registered_names()` to dynamically generate the fetcher list, ensuring new fetchers automatically appear in help without manual updates.
+The `build_parser()` in `fetch/cli.py` uses `get_registered_names()` to dynamically generate the fetcher list, ensuring new fetchers automatically appear in help without manual updates.
+
+Because the template depends on argv (see `select_parser_builder()` above), `build_parser()` in `__main__.py` takes the normalized argv and `main()` calls `normalize_argv()` before building the parser. `parents` also carries over `set_defaults()` values, which is how the `github-blog` sub-command supplies `args.url` without a `url` positional.
 
 ### Summarization
 

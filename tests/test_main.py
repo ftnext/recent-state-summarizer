@@ -7,6 +7,12 @@ import responses
 import respx
 
 from recent_state_summarizer.__main__ import main, normalize_argv
+from recent_state_summarizer.fetch.github_changelog import (
+    FEED_URL as GITHUB_BLOG_FEED_URL,
+)
+from recent_state_summarizer.fetch.github_changelog import (
+    RECENT_DAYS,
+)
 from recent_state_summarizer.fetch.registry import get_registered_names
 
 
@@ -103,7 +109,52 @@ def test_fetch_subcommand(fetch_main, monkeypatch):
     main()
 
     fetch_main.assert_called_once_with(
-        "https://example.com", "articles.jsonl", save_as_title_list=False
+        "https://example.com",
+        "articles.jsonl",
+        save_as_title_list=False,
+        days=None,
+    )
+
+
+@patch("recent_state_summarizer.__main__.fetch_main")
+def test_fetch_github_blog_sub_command(fetch_main, monkeypatch):
+    monkeypatch.setattr(
+        "sys.argv",
+        ["omae-douyo", "fetch", "github-blog", "articles.jsonl"],
+    )
+
+    main()
+
+    fetch_main.assert_called_once_with(
+        GITHUB_BLOG_FEED_URL,
+        "articles.jsonl",
+        save_as_title_list=False,
+        days=RECENT_DAYS,
+    )
+
+
+@patch("recent_state_summarizer.__main__.fetch_main")
+def test_fetch_github_blog_sub_command_days(fetch_main, monkeypatch):
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "omae-douyo",
+            "fetch",
+            "github-blog",
+            "titles.txt",
+            "--days",
+            "45",
+            "--as-title-list",
+        ],
+    )
+
+    main()
+
+    fetch_main.assert_called_once_with(
+        GITHUB_BLOG_FEED_URL,
+        "titles.txt",
+        save_as_title_list=True,
+        days=45,
     )
 
 
@@ -180,3 +231,26 @@ def test_fetch_help_includes_fetcher(capsys, monkeypatch, fetcher_name):
     assert (
         fetcher_name in help_output
     ), f"'{fetcher_name}' not found in help message"
+
+
+def test_fetch_help_hides_days_option(capsys, monkeypatch):
+    monkeypatch.setattr("sys.argv", ["omae-douyo", "fetch", "--help"])
+
+    with pytest.raises(SystemExit):
+        main()
+
+    captured = capsys.readouterr()
+    assert "--days" not in captured.out
+    assert "github-blog" in captured.out
+
+
+def test_fetch_github_blog_help_shows_days_option(capsys, monkeypatch):
+    monkeypatch.setattr(
+        "sys.argv", ["omae-douyo", "fetch", "github-blog", "--help"]
+    )
+
+    with pytest.raises(SystemExit):
+        main()
+
+    captured = capsys.readouterr()
+    assert "--days" in captured.out

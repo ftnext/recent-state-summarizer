@@ -5,6 +5,10 @@ import pytest
 from recent_state_summarizer.fetch.adventar import fetch_adventar_calendar
 from recent_state_summarizer.fetch.cli import cli
 from recent_state_summarizer.fetch.github_changelog import (
+    FEED_URL as GITHUB_BLOG_FEED_URL,
+)
+from recent_state_summarizer.fetch.github_changelog import (
+    RECENT_DAYS,
     fetch_github_changelog,
 )
 from recent_state_summarizer.fetch.hatena_blog import _fetch_titles
@@ -39,7 +43,10 @@ class TestCli:
         cli()
 
         fetch_main.assert_called_once_with(
-            "https://example.com", "output.jsonl", save_as_title_list=False
+            "https://example.com",
+            "output.jsonl",
+            save_as_title_list=False,
+            days=None,
         )
 
     def test_as_title_list(self, fetch_main, monkeypatch):
@@ -56,7 +63,50 @@ class TestCli:
         cli()
 
         fetch_main.assert_called_once_with(
-            "https://example.com", "output.txt", save_as_title_list=True
+            "https://example.com",
+            "output.txt",
+            save_as_title_list=True,
+            days=None,
+        )
+
+    def test_github_blog_sub_command(self, fetch_main, monkeypatch):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "recent_state_summarizer.fetch",
+                "github-blog",
+                "output.jsonl",
+            ],
+        )
+
+        cli()
+
+        fetch_main.assert_called_once_with(
+            GITHUB_BLOG_FEED_URL,
+            "output.jsonl",
+            save_as_title_list=False,
+            days=RECENT_DAYS,
+        )
+
+    def test_github_blog_sub_command_days(self, fetch_main, monkeypatch):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "recent_state_summarizer.fetch",
+                "github-blog",
+                "output.jsonl",
+                "--days",
+                "45",
+            ],
+        )
+
+        cli()
+
+        fetch_main.assert_called_once_with(
+            GITHUB_BLOG_FEED_URL,
+            "output.jsonl",
+            save_as_title_list=False,
+            days=45,
         )
 
 

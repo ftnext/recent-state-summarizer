@@ -3,10 +3,17 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import sys
 import textwrap
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
+from recent_state_summarizer.fetch.github_changelog import (
+    FEED_URL as GITHUB_BLOG_FEED_URL,
+)
+from recent_state_summarizer.fetch.github_changelog import (
+    RECENT_DAYS,
+)
 from recent_state_summarizer.fetch.registry import (
     get_fetcher,
     get_registered_names,
@@ -15,12 +22,19 @@ from recent_state_summarizer.fetch.types import TitleTag
 
 logger = logging.getLogger(__name__)
 
+GITHUB_BLOG_COMMAND = "github-blog"
+
 
 def _main(
-    url: str, save_path: str | Path, *, save_as_title_list: bool
+    url: str,
+    save_path: str | Path,
+    *,
+    save_as_title_list: bool,
+    days: int | None = None,
 ) -> None:
     fetcher = get_fetcher(url)
-    title_tags = fetcher(url)
+    fetcher_kwargs = {} if days is None else {"days": days}
+    title_tags = fetcher(url, **fetcher_kwargs)
     if save_as_title_list:
         contents = _as_bullet_list(
             title_tag["title"] for title_tag in title_tags
@@ -61,6 +75,9 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
     Example:
         python -m recent_state_summarizer.fetch \\
           https://awesome.hatenablog.com/archive/2023 articles.jsonl
+
+    The `{GITHUB_BLOG_COMMAND}` sub-command fetches the GitHub Changelog
+    without specifying its feed URL. See `{GITHUB_BLOG_COMMAND} --help`.
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -75,7 +92,57 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
         default=False,
         help="Save as title-only bullet list instead of JSON Lines",
     )
+    parser.set_defaults(days=None)
     return parser
+
+
+def build_github_blog_parser(
+    add_help: bool = True,
+) -> argparse.ArgumentParser:
+    help_message = f"""
+    Retrieve the titles and URLs of the GitHub Changelog entries published
+    within the recent days, without specifying the feed URL
+    ({GITHUB_BLOG_FEED_URL}).
+
+    Example:
+        python -m recent_state_summarizer.fetch \\
+          {GITHUB_BLOG_COMMAND} articles.jsonl --days 45
+    """
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(help_message),
+        add_help=add_help,
+    )
+    parser.add_argument(
+        "source",
+        choices=[GITHUB_BLOG_COMMAND],
+        help="Fetch the GitHub Changelog feed",
+    )
+    parser.add_argument("save_path", help="Local file path")
+    parser.add_argument(
+        "--as-title-list",
+        action="store_true",
+        default=False,
+        help="Save as title-only bullet list instead of JSON Lines",
+    )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=RECENT_DAYS,
+        help="Number of recent days to fetch entries from "
+        f"(default: {RECENT_DAYS})",
+    )
+    parser.set_defaults(url=GITHUB_BLOG_FEED_URL)
+    return parser
+
+
+ParserBuilder = Callable[..., argparse.ArgumentParser]
+
+
+def select_parser_builder(fetch_argv: list[str]) -> ParserBuilder:
+    if fetch_argv[:1] == [GITHUB_BLOG_COMMAND]:
+        return build_github_blog_parser
+    return build_parser
 
 
 def configure_logging() -> None:
@@ -85,7 +152,13 @@ def configure_logging() -> None:
 
 def cli():
     configure_logging()
-    parser = build_parser()
-    args = parser.parse_args()
+    argv = sys.argv[1:]
+    parser = select_parser_builder(argv)()
+    args = parser.parse_args(argv)
 
-    _main(args.url, args.save_path, save_as_title_list=args.as_title_list)
+    _main(
+        args.url,
+        args.save_path,
+        save_as_title_list=args.as_title_list,
+        days=args.days,
+    )

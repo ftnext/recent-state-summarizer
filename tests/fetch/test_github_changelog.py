@@ -61,7 +61,23 @@ def mock_feed_page_not_found(page):
 
 @pytest.fixture
 def fixed_cutoff(monkeypatch):
-    monkeypatch.setattr(github_changelog, "_recent_cutoff", lambda: CUTOFF)
+    monkeypatch.setattr(
+        github_changelog,
+        "_recent_cutoff",
+        lambda days=github_changelog.RECENT_DAYS: CUTOFF,
+    )
+
+
+@pytest.fixture
+def recorded_cutoff_days(monkeypatch):
+    passed_days = []
+
+    def record(days=github_changelog.RECENT_DAYS):
+        passed_days.append(days)
+        return CUTOFF
+
+    monkeypatch.setattr(github_changelog, "_recent_cutoff", record)
+    return passed_days
 
 
 class TestGitHubChangelog:
@@ -252,3 +268,19 @@ class TestGitHubChangelog:
         assert [title_tag["title"] for title_tag in result] == [
             "リダイレクト先の記事"
         ]
+
+    @respx.mock
+    def test_default_days(self, recorded_cutoff_days):
+        mock_feed_page_not_found(1)
+
+        list(fetch_github_changelog(FEED_URL))
+
+        assert recorded_cutoff_days == [github_changelog.RECENT_DAYS]
+
+    @respx.mock
+    def test_days_argument(self, recorded_cutoff_days):
+        mock_feed_page_not_found(1)
+
+        list(fetch_github_changelog(FEED_URL, days=45))
+
+        assert recorded_cutoff_days == [45]

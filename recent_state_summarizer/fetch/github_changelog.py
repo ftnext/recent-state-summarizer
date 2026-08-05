@@ -12,6 +12,7 @@ from recent_state_summarizer.fetch.types import TitleTag
 logger = logging.getLogger(__name__)
 
 RECENT_DAYS = 30
+FEED_URL = "https://github.blog/changelog/feed/"
 
 
 def _match_github_changelog(url: str) -> bool:
@@ -22,8 +23,8 @@ def _match_github_changelog(url: str) -> bool:
     )
 
 
-def _recent_cutoff() -> datetime:
-    return datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
+def _recent_cutoff(days: int = RECENT_DAYS) -> datetime:
+    return datetime.now(timezone.utc) - timedelta(days=days)
 
 
 def _published_at(entry) -> datetime:
@@ -31,7 +32,9 @@ def _published_at(entry) -> datetime:
 
 
 @register_fetcher(name="GitHub Changelog", matcher=_match_github_changelog)
-def fetch_github_changelog(url: str) -> Generator[TitleTag, None, None]:
+def fetch_github_changelog(
+    url: str, *, days: int = RECENT_DAYS
+) -> Generator[TitleTag, None, None]:
     """Fetch changelog entries published within the recent days.
 
     The feed returns 10 entries per page and ignores per-page size
@@ -43,11 +46,12 @@ def fetch_github_changelog(url: str) -> Generator[TitleTag, None, None]:
 
     Args:
         url: GitHub Changelog feed URL (https://github.blog/changelog/feed/)
+        days: Number of recent days to fetch entries from
 
     Yields:
         TitleTag dictionaries containing title and url
     """
-    cutoff = _recent_cutoff()
+    cutoff = _recent_cutoff(days)
 
     page = 1
     while True:
