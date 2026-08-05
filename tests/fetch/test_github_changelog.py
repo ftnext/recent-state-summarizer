@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 
 import httpx
@@ -126,6 +127,43 @@ class TestGitHubChangelog:
         assert [title_tag["title"] for title_tag in result] == [
             "1ページ目の記事",
             "2ページ目の記事",
+        ]
+
+    @respx.mock
+    def test_logs_progress_per_page(self, fixed_cutoff, caplog):
+        caplog.set_level(logging.INFO)
+        mock_feed_page(
+            1,
+            [
+                (
+                    "1ページ目の記事",
+                    "https://github.blog/changelog/2026-07-29-page-1/",
+                    "Wed, 29 Jul 2026 14:01:07 +0000",
+                )
+            ],
+        )
+        mock_feed_page(
+            2,
+            [
+                (
+                    "2ページ目の記事",
+                    "https://github.blog/changelog/2026-07-20-page-2/",
+                    "Mon, 20 Jul 2026 18:24:14 +0000",
+                )
+            ],
+        )
+        mock_feed_page_not_found(3)
+
+        list(fetch_github_changelog(FEED_URL))
+
+        assert [
+            record.getMessage()
+            for record in caplog.records
+            if record.name == github_changelog.__name__
+        ] == [
+            f"Fetching page 1 of {FEED_URL}",
+            f"Fetching page 2 of {FEED_URL}",
+            f"Fetching page 3 of {FEED_URL}",
         ]
 
     @respx.mock

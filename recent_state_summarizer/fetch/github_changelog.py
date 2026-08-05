@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Generator
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
@@ -7,6 +8,8 @@ import httpx
 
 from recent_state_summarizer.fetch.registry import register_fetcher
 from recent_state_summarizer.fetch.types import TitleTag
+
+logger = logging.getLogger(__name__)
 
 RECENT_DAYS = 30
 
@@ -48,6 +51,7 @@ def fetch_github_changelog(url: str) -> Generator[TitleTag, None, None]:
 
     page = 1
     while True:
+        logger.info("Fetching page %s of %s", page, url)
         response = httpx.get(
             url, params={"paged": page}, follow_redirects=True
         )

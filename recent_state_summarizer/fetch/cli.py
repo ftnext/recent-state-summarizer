@@ -78,7 +78,13 @@ def build_parser(add_help: bool = True) -> argparse.ArgumentParser:
     return parser
 
 
+def configure_logging() -> None:
+    logging.basicConfig(format="%(message)s")
+    logging.getLogger("recent_state_summarizer").setLevel(logging.INFO)
+
+
 def cli():
+    configure_logging()
     parser = build_parser()
     args = parser.parse_args()
 
