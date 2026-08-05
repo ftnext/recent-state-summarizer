@@ -5,15 +5,19 @@ from textwrap import dedent
 
 from recent_state_summarizer.fetch.cli import _main as fetch_main
 from recent_state_summarizer.fetch.cli import (
-    build_parser as build_fetch_parser,
-)
-from recent_state_summarizer.fetch.cli import (
     configure_logging,
+    select_parser_builder,
 )
 from recent_state_summarizer.summarize import summarize_titles
 
 
-def build_parser():
+def _fetch_argv(argv: list[str] | None) -> list[str]:
+    if argv and argv[0] == "fetch":
+        return argv[1:]
+    return []
+
+
+def build_parser(argv: list[str] | None = None):
     help_message = """
     Summarize blog article titles with the OpenAI API.
 
@@ -37,6 +41,7 @@ def build_parser():
     run_parser.add_argument("url", help="URL of archive page")
     run_parser.set_defaults(func=run_cli)
 
+    build_fetch_parser = select_parser_builder(_fetch_argv(argv))
     fetch_parser_template = build_fetch_parser(add_help=False)
     fetch_parser = subparsers.add_parser(
         "fetch",
@@ -60,7 +65,12 @@ def run_cli(args):
 
 
 def fetch_cli(args):
-    fetch_main(args.url, args.save_path, save_as_title_list=args.as_title_list)
+    fetch_main(
+        args.url,
+        args.save_path,
+        save_as_title_list=args.as_title_list,
+        days=args.days,
+    )
 
 
 def normalize_argv() -> list[str]:
@@ -81,7 +91,7 @@ def normalize_argv() -> list[str]:
 
 def main():
     configure_logging()
-    parser = build_parser()
     argv = normalize_argv()
+    parser = build_parser(argv)
     args = parser.parse_args(argv)
     args.func(args)

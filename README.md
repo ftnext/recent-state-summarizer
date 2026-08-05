@@ -46,6 +46,17 @@ $ omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 articles.
 $ omae-douyo fetch https://nikkie-ftnext.hatenablog.com/archive/2023/4 titles.txt --as-title-list
 ```
 
+#### GitHub Changelog
+
+The `github-blog` sub-command fetches the GitHub Changelog without specifying its feed URL:
+
+```
+$ omae-douyo fetch github-blog articles.jsonl
+
+# Change the period to fetch entries from (default: 30 days)
+$ omae-douyo fetch github-blog articles.jsonl --days 45
+```
+
 ## Development
 
 ### Sub commands
