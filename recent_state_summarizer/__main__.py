@@ -7,6 +7,9 @@ from recent_state_summarizer.fetch.cli import _main as fetch_main
 from recent_state_summarizer.fetch.cli import (
     build_parser as build_fetch_parser,
 )
+from recent_state_summarizer.fetch.cli import (
+    configure_logging,
+)
 from recent_state_summarizer.summarize import summarize_titles
 
 
@@ -77,6 +80,7 @@ def normalize_argv() -> list[str]:
 
 
 def main():
+    configure_logging()
     parser = build_parser()
     argv = normalize_argv()
     args = parser.parse_args(argv)
