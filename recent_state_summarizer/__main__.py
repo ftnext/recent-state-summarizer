@@ -3,6 +3,7 @@ import sys
 import tempfile
 from textwrap import dedent
 
+from recent_state_summarizer import __version__
 from recent_state_summarizer.fetch.cli import _main as fetch_main
 from recent_state_summarizer.fetch.cli import (
     configure_logging,
@@ -32,6 +33,9 @@ def build_parser(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent(help_message),
+    )
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
     )
     subparsers = parser.add_subparsers(dest="subcommand")
 
@@ -78,8 +82,8 @@ def normalize_argv() -> list[str]:
     if len(argv) == 0:
         return ["--help"]
 
-    help_flags = {"-h", "--help"}
-    if argv[0] in help_flags:
+    passthrough_flags = {"-h", "--help", "--version"}
+    if argv[0] in passthrough_flags:
         return argv
 
     known_subcommands = {"run", "fetch"}

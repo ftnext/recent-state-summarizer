@@ -6,6 +6,7 @@ import pytest
 import responses
 import respx
 
+from recent_state_summarizer import __version__
 from recent_state_summarizer.__main__ import main, normalize_argv
 from recent_state_summarizer.fetch.github_changelog import (
     FEED_URL as GITHUB_BLOG_FEED_URL,
@@ -207,6 +208,10 @@ class TestNormalizeArgv:
             "https://awesome.hatenablog.com/archive/2023/4",
         ]
 
+    def test_version_only(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["omae-douyo", "--version"])
+        assert normalize_argv() == ["--version"]
+
     def test_help_only(self, monkeypatch):
         monkeypatch.setattr("sys.argv", ["omae-douyo", "--help"])
         assert normalize_argv() == ["--help"]
@@ -242,6 +247,16 @@ def test_fetch_help_hides_days_option(capsys, monkeypatch):
     captured = capsys.readouterr()
     assert "--days" not in captured.out
     assert "github-blog" in captured.out
+
+
+def test_version_flag_shows_version(capsys, monkeypatch):
+    monkeypatch.setattr("sys.argv", ["omae-douyo", "--version"])
+
+    with pytest.raises(SystemExit):
+        main()
+
+    captured = capsys.readouterr()
+    assert __version__ in captured.out
 
 
 def test_fetch_github_blog_help_shows_days_option(capsys, monkeypatch):
