@@ -1,9 +1,9 @@
 from collections.abc import Generator
 from urllib.parse import urlparse
 
-import httpx
 from bs4 import BeautifulSoup
 
+from recent_state_summarizer.fetch import http_client
 from recent_state_summarizer.fetch.registry import register_fetcher
 from recent_state_summarizer.fetch.types import TitleTag
 
@@ -16,7 +16,7 @@ def _match_adventar(url: str) -> bool:
 
 
 def _fetch(url: str) -> str:
-    response = httpx.get(url)
+    response = http_client.get(url)
     response.raise_for_status()
     return response.text
 

@@ -2,8 +2,8 @@ from typing import Generator, TypedDict
 from urllib.parse import urlparse
 
 import feedparser
-import httpx
 
+from recent_state_summarizer.fetch import http_client
 from recent_state_summarizer.fetch.registry import register_fetcher
 
 
@@ -37,7 +37,7 @@ def fetch_hatena_bookmark_rss(
     Yields:
         Bookmark entries with title, url, and description
     """
-    response = httpx.get(url)
+    response = http_client.get(url)
     response.raise_for_status()
 
     feed = feedparser.parse(response.content)
