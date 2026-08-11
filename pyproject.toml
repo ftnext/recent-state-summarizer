@@ -27,6 +27,8 @@ dependencies = [
     "feedparser",
     "httpx",
     "openai<1",
+    "tenacity",
+    "urllib3",
 ]
 dynamic = ["version"]
 

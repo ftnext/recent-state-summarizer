@@ -1,8 +1,7 @@
 from collections.abc import Generator
 from urllib.parse import urljoin, urlparse
 
-import httpx
-
+from recent_state_summarizer.fetch import http_client
 from recent_state_summarizer.fetch.registry import register_fetcher
 from recent_state_summarizer.fetch.types import TitleTag
 
@@ -39,7 +38,7 @@ def fetch_zenn_contest(url: str) -> Generator[TitleTag, None, None]:
 
     page = 1
     while page:
-        response = httpx.get(
+        response = http_client.get(
             ZENN_ARTICLES_API_URL,
             params={
                 "contest_slug": contest_slug,

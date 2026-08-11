@@ -3,9 +3,9 @@ from collections.abc import Generator
 from typing import Any
 from urllib.parse import urlparse
 
-import httpx
 from bs4 import BeautifulSoup
 
+from recent_state_summarizer.fetch import http_client
 from recent_state_summarizer.fetch.registry import register_fetcher
 from recent_state_summarizer.fetch.types import TitleTag
 
@@ -32,7 +32,7 @@ def fetch_qiita_official_event(url: str) -> Generator[TitleTag, None, None]:
     """
     page = 1
     while page:
-        response = httpx.get(url, params={"page": page})
+        response = http_client.get(url, params={"page": page})
         response.raise_for_status()
 
         paginated_articles = _parse_paginated_articles(response.text)

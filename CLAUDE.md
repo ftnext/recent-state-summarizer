@@ -138,6 +138,18 @@ All fetchers yield `TitleTag` TypedDict objects with `title` and `url` keys.
    - `cli()`: Entry point for `python -m recent_state_summarizer.fetch`
    - Called by `__main__.py:fetch_cli()` when using `omae-douyo fetch` subcommand
 
+### Shared HTTP Helper
+
+Pagination-heavy fetchers (Hatena Blog, GitHub Changelog, Qiita Official Event, Zenn Contest, ...) make several requests in quick succession and can trip the source's rate limiter, which returns `429 Too Many Requests`. `fetch/http_client.py` centralizes retry handling so every fetcher gets this behavior for free instead of each `httpx.get()` call handling it separately:
+
+- `get(url, **kwargs) -> httpx.Response` is the only public function. It wraps `httpx.get()` in a `tenacity.Retrying` and forwards `**kwargs` (e.g. `params`, `follow_redirects`) unchanged
+- Only `429` responses are retried, and only when the `Retry-After` header is absent or requests a wait of `MAX_RETRY_AFTER_SECONDS` (60) or less. `Retry-After` is parsed with `urllib3.util.Retry().parse_retry_after()` (handles both delta-seconds and HTTP-date forms; borrowed for parsing only — urllib3's `Retry` itself can't drive httpx, which sits on httpcore rather than urllib3's connection pool). A header that fails to parse (`urllib3.exceptions.InvalidHeader`) is logged as a warning and treated as absent, falling back to backoff
+- When `Retry-After` is present and within the limit, that many seconds are slept before retrying. Otherwise the wait is exponential backoff (`wait_exponential(multiplier=INITIAL_BACKOFF_SECONDS, max=MAX_RETRY_AFTER_SECONDS)`: 1, 2, 4 seconds) up to `MAX_ATTEMPTS` (4: the initial request plus 3 retries)
+- tenacity's `Retrying` is built directly (not the `@retry` decorator) because the retry/wait predicates need to inspect the **response value**, not an exception — `httpx.get()` returns a 429 response rather than raising. `retry_error_callback=lambda retry_state: retry_state.outcome.result()` makes `get()` return the last response instead of raising tenacity's `RetryError` once attempts are exhausted, so callers still see a plain `httpx.Response`
+- `get()` calls `response.raise_for_status()` itself only when the final response is still 429 (attempts exhausted, or `Retry-After` exceeded the limit so no retry was attempted at all) — callers keep seeing `httpx.HTTPStatusError` for rate limiting, same as a direct `httpx.get()` call. Non-429 responses (including 404) are returned as-is without `raise_for_status()`, since `github_changelog.py` needs to see a 404 itself to detect the end of pagination; each fetcher keeps its own `raise_for_status()` call for its non-429 error handling
+- `Retrying(sleep=_sleep)` uses a thin `_sleep()` wrapper around `time.sleep()` instead of tenacity's default, so tests can monkeypatch `http_client._sleep` to record wait durations without actually waiting
+- Logging uses `logging.getLogger(__name__)`; since `configure_logging()` sets the `recent_state_summarizer` logger to INFO, retry waits (`before_sleep`) and give-up warnings reach stderr the same way `github_changelog`'s page-progress logs do
+
 ### Adding a New Fetcher
 
 To add support for a new source with minimal merge conflicts:
@@ -156,6 +168,8 @@ def _match_new_source(url: str) -> bool:
 def fetch_new_source(url: str) -> Generator[TitleTag, None, None]:
     ...
 ```
+
+Use `http_client.get(url)` (see "Shared HTTP Helper" above) instead of calling `httpx.get()`/`httpx.Client()` directly, so the new fetcher gets 429/`Retry-After` retry handling for free.
 
 2. Add one import line to `fetch/__init__.py`:
 ```python
@@ -229,6 +243,8 @@ Test structure mirrors source code:
 - `httpx`: HTTP client for Adventar and Qiita Advent Calendar (supports async, though not currently used)
 - `openai<1`: Legacy OpenAI API (pre-v1.0)
 - `urllib.request.urlopen`: Used by Hatena Blog fetcher only
+- `tenacity`: Retry control for `fetch/http_client.py`'s 429 handling
+- `urllib3`: Used only for `Retry().parse_retry_after()`, to parse the `Retry-After` header in `fetch/http_client.py`
 
 ## Version Management
 

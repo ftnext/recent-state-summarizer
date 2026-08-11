@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 import feedparser
 import httpx
 
+from recent_state_summarizer.fetch import http_client
 from recent_state_summarizer.fetch.registry import register_fetcher
 from recent_state_summarizer.fetch.types import TitleTag
 
@@ -56,7 +57,7 @@ def fetch_github_changelog(
     page = 1
     while True:
         logger.info("Fetching page %s of %s", page, url)
-        response = httpx.get(
+        response = http_client.get(
             url, params={"paged": page}, follow_redirects=True
         )
         if response.status_code == httpx.codes.NOT_FOUND:

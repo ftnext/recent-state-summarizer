@@ -1,8 +1,7 @@
 from collections.abc import Generator
 from urllib.parse import urlparse
 
-import httpx
-
+from recent_state_summarizer.fetch import http_client
 from recent_state_summarizer.fetch.registry import register_fetcher
 from recent_state_summarizer.fetch.types import TitleTag
 
@@ -14,7 +13,7 @@ def _match_qiita_api(url: str) -> bool:
 
 @register_fetcher(name="Qiita API v2", matcher=_match_qiita_api)
 def fetch_qiita_api(url: str) -> Generator[TitleTag, None, None]:
-    response = httpx.get(url, params={"per_page": 20})
+    response = http_client.get(url, params={"per_page": 20})
     response.raise_for_status()
 
     items = response.json()
