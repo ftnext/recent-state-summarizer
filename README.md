@@ -57,6 +57,14 @@ $ omae-douyo fetch github-blog articles.jsonl
 $ omae-douyo fetch github-blog articles.jsonl --days 45
 ```
 
+#### YouTube Playlist
+
+Set `RSS_YOUTUBE_DATA_KEY` to your YouTube Data API v3 key and pass a public playlist URL:
+
+```
+$ RSS_YOUTUBE_DATA_KEY=your-api-key omae-douyo fetch "https://www.youtube.com/playlist?list=PL..." videos.jsonl
+```
+
 ## Development
 
 ### Sub commands
