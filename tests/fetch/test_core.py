@@ -24,6 +24,9 @@ from recent_state_summarizer.fetch.qiita_official_event import (
 )
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
 from recent_state_summarizer.fetch.registry import get_fetcher
+from recent_state_summarizer.fetch.youtube_playlist import (
+    fetch_youtube_playlist,
+)
 from recent_state_summarizer.fetch.zenn_contest import fetch_zenn_contest
 from recent_state_summarizer.fetch.zenn_rss import fetch_zenn_rss
 
@@ -161,6 +164,32 @@ class TestGetFetcher:
     def test_github_changelog(self):
         url = "https://github.blog/changelog/feed/"
         assert get_fetcher(url) == fetch_github_changelog
+
+    def test_youtube_playlist(self):
+        url = "https://www.youtube.com/playlist?list=PLB0XQUsk_w8Q"
+        assert get_fetcher(url) == fetch_youtube_playlist
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://youtube.com/playlist?list=PLB0XQUsk_w8Q",
+            "https://m.youtube.com/playlist?list=PLB0XQUsk_w8Q",
+        ],
+    )
+    def test_youtube_playlist_other_hosts(self, url):
+        assert get_fetcher(url) == fetch_youtube_playlist
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://www.youtube.com/playlist",
+            "https://www.youtube.com/playlist?list=",
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLB0XQUsk_w8Q",
+        ],
+    )
+    def test_youtube_non_playlist_url_raises(self, url):
+        with pytest.raises(ValueError, match="Unsupported URL"):
+            get_fetcher(url)
 
     def test_unknown_url_raises(self):
         url = "https://example.com/blog"
