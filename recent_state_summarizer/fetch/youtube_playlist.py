@@ -41,7 +41,7 @@ def _match_youtube_playlist(url: str) -> bool:
     )
 
 
-def _get_api_key() -> str:
+def get_api_key() -> str:
     api_key = os.environ.get(API_KEY_ENV_VAR, "").strip()
     if not api_key:
         raise ValueError(
@@ -50,17 +50,9 @@ def _get_api_key() -> str:
     return api_key
 
 
-@register_fetcher(
-    name="YouTube Playlist",
-    matcher=_match_youtube_playlist,
-)
-def fetch_youtube_playlist(url: str) -> Generator[TitleTag, None, None]:
-    """Fetch video titles and URLs from a public YouTube playlist."""
-    playlist_id = _extract_playlist_id(url)
-    if playlist_id is None:
-        raise ValueError(f"Missing playlist ID in URL: {url}")
-
-    api_key = _get_api_key()
+def fetch_playlist_items(
+    playlist_id: str, api_key: str
+) -> Generator[TitleTag, None, None]:
     page = 1
     page_token: str | None = None
 
@@ -97,3 +89,17 @@ def fetch_youtube_playlist(url: str) -> Generator[TitleTag, None, None]:
         if not page_token:
             return
         page += 1
+
+
+@register_fetcher(
+    name="YouTube Playlist",
+    matcher=_match_youtube_playlist,
+)
+def fetch_youtube_playlist(url: str) -> Generator[TitleTag, None, None]:
+    """Fetch video titles and URLs from a public YouTube playlist."""
+    playlist_id = _extract_playlist_id(url)
+    if playlist_id is None:
+        raise ValueError(f"Missing playlist ID in URL: {url}")
+
+    api_key = get_api_key()
+    yield from fetch_playlist_items(playlist_id, api_key)

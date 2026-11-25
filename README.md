@@ -65,6 +65,14 @@ Set `RSS_YOUTUBE_DATA_KEY` to your YouTube Data API v3 key and pass a public pla
 $ RSS_YOUTUBE_DATA_KEY=your-api-key omae-douyo fetch "https://www.youtube.com/playlist?list=PL..." videos.jsonl
 ```
 
+#### YouTube Channel
+
+Set `RSS_YOUTUBE_DATA_KEY` to your YouTube Data API v3 key and pass a channel handle URL:
+
+```
+$ RSS_YOUTUBE_DATA_KEY=your-api-key omae-douyo fetch "https://www.youtube.com/@startpythonclub9441" videos.jsonl
+```
+
 ## Development
 
 ### Sub commands

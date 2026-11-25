@@ -24,6 +24,9 @@ from recent_state_summarizer.fetch.qiita_official_event import (
 )
 from recent_state_summarizer.fetch.qiita_rss import fetch_qiita_rss
 from recent_state_summarizer.fetch.registry import get_fetcher
+from recent_state_summarizer.fetch.youtube_channel import (
+    fetch_youtube_channel,
+)
 from recent_state_summarizer.fetch.youtube_playlist import (
     fetch_youtube_playlist,
 )
@@ -188,6 +191,37 @@ class TestGetFetcher:
         ],
     )
     def test_youtube_non_playlist_url_raises(self, url):
+        with pytest.raises(ValueError, match="Unsupported URL"):
+            get_fetcher(url)
+
+    def test_youtube_channel(self):
+        url = "https://www.youtube.com/@startpythonclub9441"
+        assert get_fetcher(url) == fetch_youtube_channel
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://www.youtube.com/@startpythonclub9441/",
+            "https://youtube.com/@startpythonclub9441",
+            "https://m.youtube.com/@startpythonclub9441",
+            "https://www.youtube.com/@%E6%97%A5%E6%9C%AC%E8%AA%9E",
+            "https://www.youtube.com/@日本語",
+        ],
+    )
+    def test_youtube_channel_variants(self, url):
+        assert get_fetcher(url) == fetch_youtube_channel
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://www.youtube.com/@",
+            "https://www.youtube.com/@startpythonclub9441/videos",
+            "https://www.youtube.com/@foo%2Fbar",
+            "https://www.youtube.com/channel/UC1234567890",
+            "https://example.com/@startpythonclub9441",
+        ],
+    )
+    def test_youtube_non_channel_url_raises(self, url):
         with pytest.raises(ValueError, match="Unsupported URL"):
             get_fetcher(url)
 
