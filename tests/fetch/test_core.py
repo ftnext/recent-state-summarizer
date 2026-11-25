@@ -204,6 +204,8 @@ class TestGetFetcher:
             "https://www.youtube.com/@startpythonclub9441/",
             "https://youtube.com/@startpythonclub9441",
             "https://m.youtube.com/@startpythonclub9441",
+            "https://www.youtube.com/@%E6%97%A5%E6%9C%AC%E8%AA%9E",
+            "https://www.youtube.com/@日本語",
         ],
     )
     def test_youtube_channel_variants(self, url):
@@ -214,6 +216,7 @@ class TestGetFetcher:
         [
             "https://www.youtube.com/@",
             "https://www.youtube.com/@startpythonclub9441/videos",
+            "https://www.youtube.com/@foo%2Fbar",
             "https://www.youtube.com/channel/UC1234567890",
             "https://example.com/@startpythonclub9441",
         ],

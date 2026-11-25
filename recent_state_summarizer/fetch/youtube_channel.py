@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Generator
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from recent_state_summarizer.fetch import http_client
 from recent_state_summarizer.fetch.registry import register_fetcher
@@ -23,7 +23,9 @@ def _extract_channel_handle(url: str) -> str | None:
     parsed = urlparse(url)
     path = parsed.path.rstrip("/")
     if path.startswith("/@") and "/" not in path[1:] and len(path) > 2:
-        return path[1:]
+        handle = unquote(path[1:])
+        if "/" not in handle and len(handle) > 1:
+            return handle
     return None
 
 

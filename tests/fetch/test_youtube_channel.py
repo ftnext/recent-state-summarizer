@@ -95,6 +95,37 @@ class TestYouTubeChannel:
         assert playlist_request.headers["X-Goog-Api-Key"] == TEST_API_KEY
 
     @respx.mock
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://www.youtube.com/@%E6%97%A5%E6%9C%AC%E8%AA%9E",
+            "https://www.youtube.com/@日本語",
+        ],
+    )
+    def test_decodes_percent_encoded_handle(self, youtube_api_key, url):
+        channels_route = respx.get(CHANNELS_API_URL).mock(
+            return_value=build_channel_response()
+        )
+        respx.get(PLAYLIST_ITEMS_API_URL).mock(
+            return_value=build_playlist_response(
+                [build_playlist_item("Video 1", "vid1")]
+            )
+        )
+
+        result = list(fetch_youtube_channel(url))
+
+        assert result == [
+            {
+                "title": "Video 1",
+                "url": "https://www.youtube.com/watch?v=vid1",
+            }
+        ]
+        assert (
+            channels_route.calls[0].request.url.params["forHandle"]
+            == "@日本語"
+        )
+
+    @respx.mock
     def test_follows_pagination(self, youtube_api_key, caplog):
         caplog.set_level(logging.INFO)
         respx.get(CHANNELS_API_URL).mock(return_value=build_channel_response())
