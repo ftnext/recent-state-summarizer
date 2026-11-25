@@ -1,43 +1,47 @@
 ---
 name: release
-description: Bumps version and creates git tag for release
+description: Bumps the version, tags the commit, and prepares a draft GitHub Release for manual publication
 disable-model-invocation: true
 argument-hint: "[version-number]"
 ---
 
-# Version Management
+# Release Preparation
 
 Version is stored in `recent_state_summarizer/__init__.py` as `__version__` and referenced by `pyproject.toml` using setuptools dynamic versioning.
 
-## Bumping Version
+The skill ends at a GitHub Release draft. A human reviews the draft and publishes it in the GitHub UI. Never publish a release or trigger PyPI publication from this skill. Publishing the GitHub Release starts the PyPI workflow in `.github/workflows/publish.yml`.
 
-Follow these steps to bump the version:
+## Prepare the Local Commit and Tag
+
+Check the current branch with `git branch --show-current`. Run the release preparation on `main` after the changes intended for this release have been merged.
+
+Use the version supplied by the user, or increment the patch version in `recent_state_summarizer/__init__.py`. Edit `__version__`, then commit the version file and create the tag. Replace `X.Y.Z` with the selected version.
 
 ```bash
-# 1. Edit version in recent_state_summarizer/__init__.py
-# 2. Commit and tag
 git add recent_state_summarizer/__init__.py
-git commit -m "chore: Bump up X.Y.Z"
+git commit --only -m "chore: Bump up X.Y.Z" -- recent_state_summarizer/__init__.py
 git tag vX.Y.Z
-git push origin main --tags
 ```
 
-## Instructions
+## Confirm the Push
 
-**Prerequisites:**
-- This must be executed on the `main` branch
-- All feature branches should be merged into `main` before running this command
-- Check current branch with `git branch --show-current` before proceeding
+For a release request, the default is to push `main` and the release tag, then create a GitHub Release draft. After creating the local commit and tag, confirm the push unless the user already authorized it. State in the confirmation that the draft follows the push and publication is manual.
 
-If the user provided a version number (e.g., `/release 0.1.0`), use that. Otherwise:
-1. Read the current version from `recent_state_summarizer/__init__.py`
-2. Parse the version number (format: MAJOR.MINOR.PATCH)
-3. Increment the PATCH number by 1
-4. Use the new version (e.g., `0.0.9` → `0.0.10`)
+In this release flow, a reply such as 「push お願いします」 confirms the push and lets the draft preparation proceed. If the user explicitly requests only a push, stop after pushing. If they defer the push, report the local commit and tag.
 
-Execute the steps above, replacing X.Y.Z with the specified or auto-incremented version.
+Push only the release branch and tag:
 
-After creating the commit and tag, use AskUserQuestion to ask whether to push to remote:
-- Question: "リモートにプッシュしますか？"
-- Option 1: "今すぐプッシュする" → Execute `git push origin main --tags`
-- Option 2: "後でやる" → Skip push and remind the user they can run `git push origin main --tags` manually later
+```bash
+git push --atomic origin refs/heads/main:refs/heads/main refs/tags/vX.Y.Z:refs/tags/vX.Y.Z
+```
+
+## Create and Hand Off the Draft
+
+After confirming the tag is on GitHub, create the release with `--draft` and `--verify-tag`. If a release already exists for the tag, report its URL and status without changing it.
+
+```bash
+gh release create vX.Y.Z --draft --verify-tag --title vX.Y.Z --generate-notes
+gh release view vX.Y.Z --json isDraft,url
+```
+
+Verify that `isDraft` is `true`, share the draft URL, and hand off to the human to review the notes and click **Publish release** in GitHub.
