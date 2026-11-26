@@ -25,6 +25,7 @@ class BookmarkEntry(TypedDict):
 @register_fetcher(
     name="はてなブックマークRSS",
     matcher=_match_hatena_bookmark_rss,
+    example="https://b.hatena.ne.jp/entrylist/user.rss",
 )
 def fetch_hatena_bookmark_rss(
     url: str,

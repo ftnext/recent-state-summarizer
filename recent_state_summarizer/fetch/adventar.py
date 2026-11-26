@@ -24,6 +24,7 @@ def _fetch(url: str) -> str:
 @register_fetcher(
     name="Adventar",
     matcher=_match_adventar,
+    example="https://adventar.org/calendars/1234",
 )
 def fetch_adventar_calendar(url: str) -> Generator[TitleTag, None, None]:
     """Fetch article titles and URLs from Adventar calendar.
